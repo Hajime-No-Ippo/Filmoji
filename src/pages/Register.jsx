@@ -45,8 +45,8 @@ function Register() {
           {/* Branding */}
           <div className="relative z-10">
             <p className="text-white/80 text-xs tracking-widest uppercase mb-4">Filmoji</p>
-            <h2 className="text-white text-2xl md:text-3xl font-bold mb-2">Nice to meet you :)</h2>
-            <p className="text-white/70 text-sm font-[Inter]">Just register to join with us</p>
+            <h2 className="text-white text-2xl md:text-3xl font-bold mb-2">Welcome! 😄</h2>
+            <p className="text-white/70 text-sm font-[Inter]">Register to save your personalised recommendations</p>
           </div>
         </div>
 

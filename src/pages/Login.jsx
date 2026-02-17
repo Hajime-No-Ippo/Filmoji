@@ -46,7 +46,7 @@ function Login() {
           {/* Branding */}
           <div className="relative z-10">
             <p className="text-white/80 text-xs tracking-widest uppercase mb-4">Filmoji</p>
-            <h2 className="text-white text-2xl md:text-3xl font-bold mb-2">Welcome back</h2>
+            <h2 className="text-white text-2xl md:text-3xl font-bold mb-2">Welcome back!</h2>
             <p className="text-white/70 text-sm font-[Inter]">Please login to continue</p>
           </div>
         </div>
