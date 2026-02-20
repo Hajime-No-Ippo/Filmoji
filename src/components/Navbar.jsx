@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { auth } from '../../firebase'
 
 function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [user, setUser] = useState({email: "test@user.com"})
   const location = useLocation()
+  const navigate = useNavigate()
   const isHome = location.pathname === '/'
 
   useEffect(() => {
@@ -12,6 +16,19 @@ function Navbar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // TODO: uncomment when Firebase auth is connected
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    await signOut(auth)
+    navigate('/')
+  }
 
   const showBg = scrolled || !isHome
 
@@ -36,12 +53,23 @@ function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/login" className="text-sm font-semibold text-white no-underline hover:text-white/80 transition-colors">
-            LOGIN
-          </Link>
-          <Link to="/register" className="btn-outline">
-            REGISTER
-          </Link>
+          {user ? (
+            <>
+              <span className="text-sm text-white/80">{user.email}</span>
+              <button onClick={handleLogout} className="btn-outline">
+                LOGOUT
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="text-sm font-semibold text-white no-underline hover:text-white/80 transition-colors">
+                LOGIN
+              </Link>
+              <Link to="/register" className="btn-outline">
+                REGISTER
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -64,8 +92,17 @@ function Navbar() {
           <Link to="/categories" className="nav-link" onClick={() => setMenuOpen(false)}>All Categories</Link>
 
           <hr className="border-white/10" />
-          <Link to="/login" className="text-white no-underline font-semibold" onClick={() => setMenuOpen(false)}>LOGIN</Link>
-          <Link to="/register" className="text-white no-underline" onClick={() => setMenuOpen(false)}>REGISTER</Link>
+          {user ? (
+            <>
+              <p className="text-white/80 text-sm mb-2">{user.email}</p>
+              <button onClick={() => { handleLogout(); setMenuOpen(false) }} className="text-white no-underline font-semibold bg-transparent border-none cursor-pointer text-left p-0 text-base">LOGOUT</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="text-white no-underline font-semibold" onClick={() => setMenuOpen(false)}>LOGIN</Link>
+              <Link to="/register" className="text-white no-underline" onClick={() => setMenuOpen(false)}>REGISTER</Link>
+            </>
+          )}
         </div>
       )}
     </nav>

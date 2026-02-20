@@ -21,10 +21,10 @@ function Hero() {
 
         {/* Content */}
         <div className="relative z-10">
-          <h1 className="text-6xl md:text-8xl font-light tracking-[0.15em] text-white mb-4">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-light tracking-[0.15em] text-white mb-4">
             FILMOJI
           </h1>
-          <p className="text-sm md:text-base tracking-[0.4em] uppercase text-white/80 mb-12">
+          <p className="text-xs sm:text-sm md:text-base tracking-[0.2em] sm:tracking-[0.4em] uppercase text-white/80 mb-12">
             A Film Recommendation Platform
           </p>
           <MoodInput />
