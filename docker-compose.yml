@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:16
+    container_name: filmoji-postgres
+    environment:
+      POSTGRES_DB: filmoji
+      POSTGRES_USER: filmoji
+      POSTGRES_PASSWORD: filmoji_pw
+    ports:
+      - "5432:5432"
