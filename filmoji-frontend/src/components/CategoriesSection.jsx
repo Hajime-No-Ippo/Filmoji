@@ -1,12 +1,13 @@
 import { categories } from '../data/categories'
 import CategoryCard from './CategoryCard'
+import ScrollReveal from './ScrollReveal'
 
 function CategoriesSection() {
   return (
     <section id="categories" className="section">
       <div className="container-main">
-        <h2 className="section-title">Top Categories</h2>
-        <p className="section-subtitle">Browse movies by your favorite genres</p>
+        <ScrollReveal textClassName="text-ink font-bold text-3xl">Top Categories</ScrollReveal>
+        <ScrollReveal textClassName="section-subtitle" baseRotation={0} enableBlur={false}>Browse movies by your favorite genres</ScrollReveal>
         <div className="grid-categories">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />

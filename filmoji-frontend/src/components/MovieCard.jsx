@@ -9,7 +9,7 @@ function MovieCard({ movie }) {
         />
       </div>
       <div className="p-4">
-        <h3 className="text-sm font-semibold text-white truncate">{movie.title}</h3>
+        <h3 className="text-sm font-semibold text-ink truncate">{movie.title}</h3>
         <div className="flex items-center justify-between mt-2">
           <span className="text-xs text-muted">{movie.year}</span>
           <span className="text-xs font-semibold text-yellow-400 flex items-center gap-1">
@@ -21,7 +21,7 @@ function MovieCard({ movie }) {
         </div>
         <div className="flex gap-2 mt-2 flex-wrap">
           {movie.genres.map((genre) => (
-            <span key={genre} className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+            <span key={genre} className="text-[10px] px-2 py-0.5 rounded-full bg-accent/20 text-ink/60">
               {genre}
             </span>
           ))}

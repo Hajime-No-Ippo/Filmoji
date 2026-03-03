@@ -55,7 +55,7 @@ function MovieReviews() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black pt-24 pb-12 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

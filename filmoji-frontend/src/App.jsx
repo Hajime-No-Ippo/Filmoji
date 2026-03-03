@@ -11,6 +11,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import UserProfile from "./pages/UserProfile";
 import MovieReviews from "./pages/MovieReviews";
+import MovieDetail from "./pages/MovieDetail";
+import Recommendations from "./pages/Recommendations";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -22,6 +24,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/reviews" element={<MovieReviews />} />
+          <Route path="/movie/:id" element={<MovieDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -41,6 +44,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/forget" element={<ForgotPassword />} />
         </Routes>
       </main>
