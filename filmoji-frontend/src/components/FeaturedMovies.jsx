@@ -53,7 +53,7 @@ function FeaturedMovies() {
         <h2 className="section-title">Featured Movies</h2>
         <p className="section-subtitle">Handpicked recommendations just for you</p>
         <div className="grid-movies">
-          {featuredMovies.map((movie) => (
+          {movies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} />
           ))}
         </div>
