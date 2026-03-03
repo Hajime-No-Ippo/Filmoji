@@ -31,31 +31,36 @@ function Navbar() {
   };
 
   const showBg = scrolled || !isHome;
+  // Hero is dark (emoji blocks) → white text when transparent.
+  // Scrolled / other pages use light cream bg → dark ink text.
+  const tc  = showBg ? "text-[#1C1600]"    : "text-white";
+  const tcF = showBg ? "text-[#1C1600]/70" : "text-white/80";
+  const bar = showBg ? "bg-[#1C1600]"      : "bg-white";
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${showBg ? "bg-dark/95 backdrop-blur-sm shadow-lg" : "bg-transparent"}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${showBg ? "bg-dark/95 backdrop-blur-sm shadow-sm shadow-border" : "bg-transparent"}`}
     >
       <div className="container-main px-6 py-4 flex items-center justify-between">
         <Link
           to="/"
-          className="text-xl font-bold tracking-widest text-white no-underline"
+          className={`text-xl font-bold tracking-widest no-underline transition-colors ${tc}`}
         >
           FILMOJI
         </Link>
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
-          <a href={isHome ? "#featured" : "/"} className="nav-link">
+          <a href={isHome ? "#featured" : "/"} className={`nav-link transition-colors ${tcF}`}>
             Featured
           </a>
-          <a href={isHome ? "#categories" : "/categories"} className="nav-link">
+          <a href={isHome ? "#categories" : "/categories"} className={`nav-link transition-colors ${tcF}`}>
             Top Categories
           </a>
-          <Link to="/categories" className="nav-link">
+          <Link to="/categories" className={`nav-link transition-colors ${tcF}`}>
             All Categories
           </Link>
-          <Link to="/reviews" className="nav-link">
+          <Link to="/reviews" className={`nav-link transition-colors ${tcF}`}>
             Reviews
           </Link>
         </div>
@@ -65,11 +70,14 @@ function Navbar() {
             <>
               <Link
                 to="/profile"
-                className="text-sm text-white/80 no-underline hover:text-white transition-colors"
+                className={`text-sm no-underline transition-colors ${tcF}`}
               >
                 {user.email}
               </Link>
-              <button onClick={handleLogout} className="btn-outline">
+              <button
+                onClick={handleLogout}
+                className={`text-sm px-5 py-2 border rounded-full no-underline transition-colors cursor-pointer bg-transparent ${showBg ? "border-[#1C1600]/30 text-[#1C1600] hover:bg-[#1C1600]/10" : "border-white/40 text-white hover:bg-white/10"}`}
+              >
                 LOGOUT
               </button>
             </>
@@ -77,11 +85,14 @@ function Navbar() {
             <>
               <Link
                 to="/login"
-                className="text-sm font-semibold text-white no-underline hover:text-white/80 transition-colors"
+                className={`text-sm font-semibold no-underline transition-colors ${tc}`}
               >
                 LOGIN
               </Link>
-              <Link to="/register" className="btn-outline">
+              <Link
+                to="/register"
+                className={`text-sm px-5 py-2 border rounded-full no-underline transition-colors ${showBg ? "border-[#1C1600]/30 text-[#1C1600] hover:bg-[#1C1600]/10" : "border-white/40 text-white hover:bg-white/10"}`}
+              >
                 REGISTER
               </Link>
             </>
@@ -94,66 +105,57 @@ function Navbar() {
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
         >
-          <span
-            className={`block w-6 h-0.5 bg-white transition-transform ${menuOpen ? "rotate-45 translate-y-2" : ""}`}
-          />
-          <span
-            className={`block w-6 h-0.5 bg-white transition-opacity ${menuOpen ? "opacity-0" : ""}`}
-          />
-          <span
-            className={`block w-6 h-0.5 bg-white transition-transform ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`}
-          />
+          <span className={`block w-6 h-0.5 transition-transform ${bar} ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
+          <span className={`block w-6 h-0.5 transition-opacity ${bar} ${menuOpen ? "opacity-0" : ""}`} />
+          <span className={`block w-6 h-0.5 transition-transform ${bar} ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
         </button>
       </div>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden bg-dark/95 backdrop-blur-sm border-t border-white/10 px-6 py-4 flex flex-col gap-4">
+        <div className="md:hidden bg-dark/98 backdrop-blur-sm border-t border-border px-6 py-4 flex flex-col gap-4">
           <a
             href={isHome ? "#featured" : "/"}
-            className="nav-link"
+            className="nav-link text-[#1C1600]/70"
             onClick={() => setMenuOpen(false)}
           >
             Featured
           </a>
           <a
             href={isHome ? "#categories" : "/categories"}
-            className="nav-link"
+            className="nav-link text-[#1C1600]/70"
             onClick={() => setMenuOpen(false)}
           >
             Top Categories
           </a>
           <Link
             to="/categories"
-            className="nav-link"
+            className="nav-link text-[#1C1600]/70"
             onClick={() => setMenuOpen(false)}
           >
             All Categories
           </Link>
           <Link
             to="/reviews"
-            className="nav-link"
+            className="nav-link text-[#1C1600]/70"
             onClick={() => setMenuOpen(false)}
           >
             Reviews
           </Link>
 
-          <hr className="border-white/10" />
+          <hr className="border-border" />
           {user ? (
             <>
               <Link
                 to="/profile"
-                className="text-white/80 no-underline text-sm"
+                className="text-[#1C1600]/70 no-underline text-sm"
                 onClick={() => setMenuOpen(false)}
               >
                 {user.email}
               </Link>
               <button
-                onClick={() => {
-                  handleLogout();
-                  setMenuOpen(false);
-                }}
-                className="text-white no-underline font-semibold bg-transparent border-none cursor-pointer text-left p-0 text-base"
+                onClick={() => { handleLogout(); setMenuOpen(false); }}
+                className="text-[#1C1600] no-underline font-semibold bg-transparent border-none cursor-pointer text-left p-0 text-base"
               >
                 LOGOUT
               </button>
@@ -162,14 +164,14 @@ function Navbar() {
             <>
               <Link
                 to="/login"
-                className="text-white no-underline font-semibold"
+                className="text-[#1C1600] no-underline font-semibold"
                 onClick={() => setMenuOpen(false)}
               >
                 LOGIN
               </Link>
               <Link
                 to="/register"
-                className="text-white no-underline"
+                className="text-[#1C1600] no-underline"
                 onClick={() => setMenuOpen(false)}
               >
                 REGISTER

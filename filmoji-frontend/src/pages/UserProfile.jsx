@@ -144,7 +144,7 @@ function UserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black pt-24 px-4">
       <div className="max-w-4xl mx-auto">
         {/* User Info Header */}
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8 border border-white/20">
