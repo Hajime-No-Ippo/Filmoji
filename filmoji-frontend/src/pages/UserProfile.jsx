@@ -43,12 +43,21 @@ function UserProfile() {
   const loadUserReviews = async (userId) => {
     try {
       const reviewsRef = collection(db, "reviews");
-      const q = query(
-        reviewsRef,
-        where("userId", "==", userId),
-        orderBy("createdAt", "desc"),
-      );
-      const querySnapshot = await getDocs(q);
+      let querySnapshot;
+
+      try {
+        const orderedQuery = query(
+          reviewsRef,
+          where("userId", "==", userId),
+          orderBy("createdAt", "desc"),
+        );
+        querySnapshot = await getDocs(orderedQuery);
+      } catch (orderedQueryError) {
+        // Fallback when Firestore index/ordering is unavailable.
+        const fallbackQuery = query(reviewsRef, where("userId", "==", userId));
+        querySnapshot = await getDocs(fallbackQuery);
+      }
+
       const reviews = [];
       querySnapshot.forEach((doc) => {
         const reviewData = doc.data();
@@ -59,6 +68,13 @@ function UserProfile() {
           movieTitle: movie ? movie.title : "Unknown Movie",
         });
       });
+
+      reviews.sort((a, b) => {
+        const aTime = a.createdAt?.toMillis?.() || 0;
+        const bTime = b.createdAt?.toMillis?.() || 0;
+        return bTime - aTime;
+      });
+
       setUserReviews(reviews);
     } catch (error) {
       console.error("Error loading reviews:", error);
