@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { categories } from "../data/categories";
 
 const preferenceOptions = [
@@ -26,28 +27,48 @@ function PersonalPreference() {
         loadPreferences(currentUser.uid);
       } else {
         navigate("/login");
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  const loadPreferences = (userId) => {
-    // Load preferences from localStorage
-    const saved = localStorage.getItem(`preferences_${userId}`);
-    if (saved) {
-      setGenrePreferences(JSON.parse(saved));
+  const loadPreferences = async (userId) => {
+    try {
+      const preferenceRef = doc(db, "userPreferences", userId);
+      const snapshot = await getDoc(preferenceRef);
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setGenrePreferences(data.genrePreferences || {});
+      }
+    } catch (error) {
+      console.error("Error loading preferences:", error);
+      alert("Failed to load preferences");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const savePreferences = (preferences) => {
+  const savePreferences = async (preferences) => {
     if (user) {
-      localStorage.setItem(
-        `preferences_${user.uid}`,
-        JSON.stringify(preferences),
-      );
-      alert("Preferences saved successfully!");
+      try {
+        const preferenceRef = doc(db, "userPreferences", user.uid);
+        await setDoc(
+          preferenceRef,
+          {
+            userId: user.uid,
+            userEmail: user.email,
+            genrePreferences: preferences,
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true },
+        );
+        alert("Preferences saved successfully!");
+      } catch (error) {
+        console.error("Error saving preferences:", error);
+        alert("Failed to save preferences");
+      }
     }
   };
 
@@ -83,8 +104,8 @@ function PersonalPreference() {
     return preferenceOptions.find((p) => p.id === prefId);
   };
 
-  const handleSave = () => {
-    savePreferences(genrePreferences);
+  const handleSave = async () => {
+    await savePreferences(genrePreferences);
   };
 
   const handleReset = () => {
