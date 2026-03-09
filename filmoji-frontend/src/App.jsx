@@ -13,6 +13,7 @@ import UserProfile from "./pages/UserProfile";
 import MovieReviews from "./pages/MovieReviews";
 import MovieDetail from "./pages/MovieDetail";
 import Recommendations from "./pages/Recommendations";
+import PersonalPreference from "./pages/PersonalPreference";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -27,7 +28,14 @@ function App() {
           <Route path="/movie/:id" element={<MovieDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
@@ -41,6 +49,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/personal-preference"
+            element={
+              <ProtectedRoute>
+                <PersonalPreference />
               </ProtectedRoute>
             }
           />

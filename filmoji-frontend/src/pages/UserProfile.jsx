@@ -22,7 +22,7 @@ function UserProfile() {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [userReviews, setUserReviews] = useState([]);
-  const [activeTab, setActiveTab] = useState("add"); // "add" or "my-reviews"
+  const [activeTab, setActiveTab] = useState("overview"); // "overview", "add" or "my-reviews"
   const [editingReview, setEditingReview] = useState(null);
   const navigate = useNavigate();
 
@@ -153,38 +153,128 @@ function UserProfile() {
               {user?.email?.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">My Reviews</h1>
+              <h1 className="text-2xl font-bold text-white">My Profile</h1>
               <p className="text-gray-300">{user?.email}</p>
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex space-x-4 mb-6">
-          <button
-            onClick={() => setActiveTab("add")}
-            className={`px-6 py-3 rounded-lg font-medium transition ${
-              activeTab === "add"
-                ? "bg-purple-600 text-white"
-                : "bg-white/10 text-gray-300 hover:bg-white/20"
-            }`}
-          >
-            {editingReview ? "Edit Review" : "Add Review"}
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("my-reviews");
-              cancelEdit();
-            }}
-            className={`px-6 py-3 rounded-lg font-medium transition ${
-              activeTab === "my-reviews"
-                ? "bg-purple-600 text-white"
-                : "bg-white/10 text-gray-300 hover:bg-white/20"
-            }`}
-          >
-            My Reviews ({userReviews.length})
-          </button>
-        </div>
+        {/* Overview - Main Selection Page */}
+        {activeTab === "overview" && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-white mb-6 text-center">
+              Choose an option to continue
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Personal Preference Card */}
+              <div
+                onClick={() => navigate("/personal-preference")}
+                className="group bg-gradient-to-br from-pink-600/30 to-purple-600/30 backdrop-blur-lg rounded-2xl p-8 border-2 border-pink-400/50 hover:border-pink-400 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-pink-500/50"
+              >
+                <div className="text-center">
+                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
+                    ⭐
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    Personal Preference
+                  </h3>
+                  <p className="text-gray-200 mb-4 leading-relaxed">
+                    Set your movie genre preferences and customize your
+                    experience
+                  </p>
+                  <div className="inline-flex items-center text-pink-300 font-medium group-hover:text-pink-200">
+                    Configure Preferences
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* My Reviews Card */}
+              <div
+                onClick={() => setActiveTab("my-reviews")}
+                className="group bg-gradient-to-br from-blue-600/30 to-purple-600/30 backdrop-blur-lg rounded-2xl p-8 border-2 border-blue-400/50 hover:border-blue-400 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-blue-500/50"
+              >
+                <div className="text-center">
+                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
+                    📝
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    My Reviews
+                  </h3>
+                  <p className="text-gray-200 mb-4 leading-relaxed">
+                    View, add, edit, and manage all your movie reviews
+                  </p>
+                  <div className="inline-flex items-center text-blue-300 font-medium group-hover:text-blue-200">
+                    Manage Reviews ({userReviews.length})
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tabs - Only show when not in overview */}
+        {activeTab !== "overview" && (
+          <div className="flex space-x-4 mb-6">
+            <button
+              onClick={() => setActiveTab("overview")}
+              className="px-6 py-3 rounded-lg font-medium transition bg-white/10 text-gray-300 hover:bg-white/20"
+            >
+              ← Back
+            </button>
+            <button
+              onClick={() => setActiveTab("add")}
+              className={`px-6 py-3 rounded-lg font-medium transition ${
+                activeTab === "add"
+                  ? "bg-purple-600 text-white"
+                  : "bg-white/10 text-gray-300 hover:bg-white/20"
+              }`}
+            >
+              {editingReview ? "Edit Review" : "Add Review"}
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("my-reviews");
+                cancelEdit();
+              }}
+              className={`px-6 py-3 rounded-lg font-medium transition ${
+                activeTab === "my-reviews"
+                  ? "bg-purple-600 text-white"
+                  : "bg-white/10 text-gray-300 hover:bg-white/20"
+              }`}
+            >
+              My Reviews ({userReviews.length})
+            </button>
+          </div>
+        )}
 
         {/* Add/Edit Review Tab */}
         {activeTab === "add" && (
