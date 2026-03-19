@@ -21,7 +21,7 @@ const columns = [
       { emoji: '😢', mood: 'sad',       color: '#3B5BDB' },
       { emoji: '😍', mood: 'romantic',  color: '#E05A2B' },
       { emoji: '🤩', mood: 'excited',   color: '#2D6A4F' },
-      { emoji: '😴', mood: 'bored',     color: '#2D6A4F' },
+      { emoji: '🥱', mood: 'bored',     color: '#2D6A4F' },
     ],
   },
   {
@@ -37,7 +37,7 @@ const columns = [
     initialY: -20,
     blocks: [
       { emoji: '😂', mood: 'laughing',     color: '#F5C519' },
-      { emoji: '🤔', mood: 'curious',      color: '#2D6A4F' },
+      { emoji: '🤔', mood: 'thoughtful',      color: '#2D6A4F' },
       { emoji: '😤', mood: 'tense',        color: '#E05A2B' },
       { emoji: '🫠', mood: 'overwhelmed',  color: '#3B5BDB' },
     ],
@@ -52,20 +52,23 @@ const moodLabels = {
   sad:         '😢 Sad',
   romantic:    '😍 Romantic',
   excited:     '🤩 Excited',
-  bored:       '😴 Bored',
+  bored:       '🥱 Bored',
   scared:      '😱 Scared',
   emotional:   '🥺 Emotional',
   mindblown:   '🤯 Mind-blown',
   peaceful:    '😌 Peaceful',
   laughing:    '😂 Laughing',
-  curious:     '🤔 Curious',
+  thoughtful:  '🤔 Thoughtful',
   tense:       '😤 Tense',
   overwhelmed: '🫠 Overwhelmed',
 }
 
+const movies = featuredMovies.slice(0, 5)
+
 function Hero() {
   const { scrollY } = useScroll()
   const [expanded, setExpanded] = useState(null)   // { emoji, mood, color, rect }
+  const selected = movies[0]
 
   // Parallax activates once the emoji section scrolls into view (~1 viewport down)
   const y0 = useTransform(scrollY, [400, 1600], [0,  -70])
@@ -98,7 +101,7 @@ function Hero() {
       </div>
 
       {/* ── 2. Emoji blocks screen ── */}
-      <div className="relative min-h-screen overflow-hidden flex gap-3 p-3 pt-24">
+      <div className="relative min-h-screen overflow-hidden flex gap-3 p-3 pt-30">
         
         {columns.map((col, colIdx) => (
           <motion.div
@@ -143,79 +146,118 @@ function Hero() {
 
             <motion.div
               layoutId={`emoji-block-${expanded.mood}`}
-              initial={{
-                borderRadius: '1.5rem',
-              }}
-              animate={{
-                borderRadius: 0,
-              }}
-              exit={{
-                borderRadius: '1.5rem',
-                opacity: 0,
-              }}
+              initial={{ borderRadius: '1.5rem' }}
+              animate={{ borderRadius: 0 }}
+              exit={{ borderRadius: '1.5rem', opacity: 0 }}
               transition={{ type: 'spring', stiffness: 280, damping: 30 }}
               style={{ backgroundColor: expanded.color }}
-              className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
+              className="fixed inset-0 z-[100] flex overflow-hidden"
             >
-              {/* Close hint */}
+              {/* Subtle radial glow behind emoji */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'radial-gradient(ellipse 55% 60% at 28% 52%, rgba(255,255,255,0.18) 0%, transparent 70%)',
+                }}
+              />
+
+              {/* Close button */}
               <button
                 onClick={handleClose}
-                className="absolute top-6 right-6 text-white/60 hover:text-white text-sm font-[Inter] tracking-widest uppercase bg-transparent border-none cursor-pointer transition-colors"
+                className="absolute top-6 right-6 z-10 flex items-center gap-1.5 text-white/60 hover:text-white text-xs font-[Inter] tracking-widest uppercase bg-white/10 hover:bg-white/20 backdrop-blur-sm border-none cursor-pointer transition-all px-4 py-2 rounded-full"
               >
                 ✕ Close
               </button>
 
-              {/* Big emoji */}
-              <motion.span
-                layoutId={`emoji-${expanded.mood}`}
-                className="text-[22vw] leading-none select-none mb-6"
-              >
-                {expanded.emoji}
-              </motion.span>
+              {/* ── Left panel: emoji + mood identity ── */}
+              <div className="flex flex-col items-center justify-center w-[42%] px-12 gap-5">
+                <motion.span
+                  layoutId={`emoji-${expanded.mood}`}
+                  className="leading-none select-none"
+                  style={{ fontSize: 'clamp(6rem, 14vw, 13rem)' }}
+                >
+                  {expanded.emoji}
+                </motion.span>
 
-              {/* Mood label */}
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ delay: 0.15 }}
-                className="text-white text-3xl sm:text-5xl font-bold tracking-wide mb-4"
-              >
-                {moodLabels[expanded.mood]}
-              </motion.h2>
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="text-center"
+                >
+                  <p className="text-white/60 text-xs tracking-[0.3em] uppercase font-[Inter] mb-2">
+                    You're feeling
+                  </p>
+                  <h2 className="text-white font-bold tracking-tight leading-none"
+                    style={{ fontSize: 'clamp(2rem, 4.5vw, 4rem)' }}
+                  >
+                    {moodLabels[expanded.mood]}
+                  </h2>
+                </motion.div>
+              </div>
 
-              {/* Movie teasers */}
+              {/* Divider */}
               <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ scaleY: 0, opacity: 0 }}
+                animate={{ scaleY: 1, opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex flex-col items-center gap-6"
-              >
-                <p className="text-white/70 text-sm font-[Inter] tracking-widest uppercase">
-                  Movies for this mood
+                transition={{ delay: 0.1, duration: 0.4 }}
+                className="w-px self-stretch my-16 origin-center"
+                style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+              />
+
+              {/* ── Right: film detail panel ── */}
+              <div className="flex flex-col justify-center py-14 px-10 flex-1 max-w-xl">
+
+                <h2 className="text-2xl font-bold text-white mb-2">{selected.title}</h2>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-xs text-white/40">{selected.year}</span>
+                  <span className="text-xs font-semibold text-yellow-500">★ {selected.rating}</span>
+                  {selected.genres.map((g) => (
+                    <span key={g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-white/50">
+                      {g}
+                    </span>
+                  ))}
+                </div>
+
+                <p className="text-white/60 text-sm leading-relaxed mb-8">
+                  {selected.description ||
+                    'An unforgettable film crafted with a gripping story, stunning visuals, and a tone that perfectly reflects your mood right now.'}
                 </p>
 
-                <div className="flex gap-3 overflow-hidden">
-                  {featuredMovies.slice(0, 4).map((movie) => (
-                    <div key={movie.id} className="w-24 shrink-0">
-                      <img
-                        src={movie.poster}
-                        alt={movie.title}
-                        className="w-full aspect-[2/3] object-cover rounded-xl shadow-xl"
-                      />
-                    </div>
-                  ))}
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white mb-2">
+                  Reason we suggest
+                </h3>
+                <p className="text-white/60 text-sm leading-relaxed mb-8">
+                  Based on your{' '}
+                  <span className="font-semibold text-white/80">{expanded.mood}</span> mood, this film's
+                  tone, pacing, and emotional arc are a natural match for how you're feeling.
+                </p>
+
+                {/* Trailer placeholder */}
+                <div
+                  className="rounded-2xl flex items-center justify-center mb-8 cursor-pointer hover:brightness-[0.97] transition-all"
+                  style={{ backgroundColor: '#e9eaec', height: 172 }}
+                >
+                  <div className="flex flex-col items-center gap-2 text-ink/30">
+                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+                      <circle cx="22" cy="22" r="22" fill="currentColor" fillOpacity="0.12" />
+                      <polygon points="18,14 33,22 18,30" fill="currentColor" fillOpacity="0.45" />
+                    </svg>
+                    <span className="text-xs tracking-widest uppercase">Trailer</span>
+                  </div>
                 </div>
 
                 <Link
                   to={`/recommendations?mood=${expanded.mood}`}
                   onClick={handleClose}
-                  className="mt-2 px-8 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white font-semibold text-sm uppercase tracking-widest rounded-full no-underline transition-colors"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-sm font-bold uppercase tracking-widest rounded-full no-underline transition-all hover:bg-white/90 hover:gap-3 self-start"
+                  style={{ color: expanded.color }}
                 >
-                  See all recommendations →
+                  See all recommendations <span>→</span>
                 </Link>
-              </motion.div>
+              </div>
             </motion.div>
           </>
         )}

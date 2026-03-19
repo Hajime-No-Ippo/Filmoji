@@ -1,5 +1,8 @@
+import { Link } from 'react-router-dom'
+
 function MovieCard({ movie }) {
   return (
+    <Link to={`/movie/${movie.id}`} className="no-underline">
     <div className="group card-base overflow-hidden cursor-pointer hover:scale-105 hover:shadow-xl hover:shadow-black/40">
       <div className="aspect-[2/3] overflow-hidden">
         <img
@@ -28,6 +31,7 @@ function MovieCard({ movie }) {
         </div>
       </div>
     </div>
+    </Link>
   )
 }
 

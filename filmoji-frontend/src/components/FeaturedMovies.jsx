@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { featuredMovies } from '../data/movies'
 import MovieCard from './MovieCard'
-import ScrollReveal from './ScrollReveal'
 
 function FeaturedMovies() {
   const [movies, setMovies] = useState([]);
@@ -25,7 +24,7 @@ function FeaturedMovies() {
 
         // Format the OMDb data to match your component's needs
         const formattedMovies = results.map((data, index) => ({
-          id: data.imdbID || index,
+          id: featuredMovies[index].id,
           title: data.Title || featuredMovies[index].title,
           year: data.Year || featuredMovies[index].year,
           // Use OMDb poster, fallback to your local one if "N/A"
@@ -51,8 +50,8 @@ function FeaturedMovies() {
   return (
     <section id="featured" className="section">
       <div className="container-main">
-        <ScrollReveal textClassName="text-ink font-bold text-3xl">Featured Movies</ScrollReveal>
-        <ScrollReveal textClassName="section-subtitle" baseRotation={0} enableBlur={false}>Handpicked recommendations just for you</ScrollReveal>
+        <h2 className="section-title">Featured Movies</h2>
+        <p className="section-subtitle">Handpicked recommendations just for you</p>
         <div className="grid-movies">
           {movies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} />

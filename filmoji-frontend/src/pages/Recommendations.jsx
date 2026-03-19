@@ -10,13 +10,13 @@ const moodLabels = {
   sad:         '😢 Sad',
   romantic:    '😍 Romantic',
   excited:     '🤩 Excited',
-  bored:       '😴 Bored',
+  bored:       '🥱 Bored',
   scared:      '😱 Scared',
   emotional:   '🥺 Emotional',
   mindblown:   '🤯 Mind-blown',
   peaceful:    '😌 Peaceful',
   laughing:    '😂 Laughing',
-  curious:     '🤔 Curious',
+  thoughtful:  '🤔 Thoughtful',
   tense:       '😤 Tense',
   overwhelmed: '🫠 Overwhelmed',
 }
@@ -31,7 +31,7 @@ function Recommendations() {
       <div className="container-main">
         <Link to="/" className="accent-link text-sm mb-8 inline-block">← Back</Link>
 
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <h1 className="text-3xl font-bold text-ink mb-2">
           {label ? `Feeling ${label}?` : 'Recommendations'}
         </h1>
         <p className="section-subtitle mb-10">

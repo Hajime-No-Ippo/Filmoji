@@ -39,8 +39,8 @@ function Register() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
             </svg>
           </Link>
-          <p className="text-white/80 text-xs tracking-widest uppercase mb-1">Filmoji</p>
-          <h2 className="text-white text-xl font-bold">Nice to meet you :)</h2>
+          <p className="text-ink/80 text-xs tracking-widest uppercase mb-1">Filmoji</p>
+          <h2 className="text-ink text-xl font-bold">Nice to meet you :)</h2>
         </div> */}
 
         {/* Left decorative panel (desktop only) */}
@@ -78,7 +78,7 @@ function Register() {
         <div className="md:w-7/12 bg-card p-8 md:p-12 flex flex-col justify-center">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
-            <h1 className="text-2xl font-bold text-white">Register</h1>
+            <h1 className="text-2xl font-bold text-ink">Register</h1>
             <Link to="/login" className="accent-link flex items-center gap-1 font-[Inter] text-sm">
               <span>&rarr;</span> Already have account?
             </Link>
@@ -149,7 +149,7 @@ function Register() {
                   onChange={(e) => setAccepted(e.target.checked)}
                   className="w-4 h-4 mt-0.5 rounded accent-accent shrink-0"
                 />
-                <span className="text-white/60 text-xs leading-relaxed font-[Inter]">
+                <span className="text-ink/60 text-xs leading-relaxed font-[Inter]">
                   I have read and accept the{' '}
                   <a href="#" className="accent-link">Terms of Service & Privacy Policy</a> *
                 </span>
