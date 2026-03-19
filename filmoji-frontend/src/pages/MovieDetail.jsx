@@ -26,15 +26,15 @@ function MovieDetail() {
           </span>
         ))}
       </div>
-      <h1 className="text-4xl md:text-6xl font-bold text-white mb-3 tracking-tight">
+      <h1 className="text-4xl md:text-6xl font-bold text-ink mb-3 tracking-tight">
         {movie.title}
       </h1>
-      <p className="text-white/60 text-lg mb-6">{movie.year}</p>
-      <div className="flex items-center justify-center gap-6 text-sm text-white/70">
+      <p className="text-muted text-lg mb-6">{movie.year}</p>
+      <div className="flex items-center justify-center gap-6 text-sm text-muted">
         <div className="flex items-center gap-1">
-          <span className="text-yellow-400 text-xl">★</span>
-          <span className="text-2xl font-bold text-white">{movie.rating}</span>
-          <span className="text-white/40">/10 IMDb</span>
+          <span className="text-yellow-500 text-xl">★</span>
+          <span className="text-2xl font-bold text-ink">{movie.rating}</span>
+          <span className="text-muted">/10 IMDb</span>
         </div>
       </div>
     </div>

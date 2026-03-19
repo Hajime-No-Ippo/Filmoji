@@ -14,10 +14,12 @@ import MovieReviews from "./pages/MovieReviews";
 import MovieDetail from "./pages/MovieDetail";
 import Recommendations from "./pages/Recommendations";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <ToastProvider>
+      <ScrollToTop />
       <Navbar />
       <main>
         <Routes>
