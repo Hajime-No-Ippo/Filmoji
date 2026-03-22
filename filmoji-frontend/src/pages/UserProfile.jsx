@@ -153,24 +153,49 @@ function UserProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-black">
-        <div className="text-white text-xl">Loading...</div>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--color-dark)" }}
+      >
+        <div className="text-xl" style={{ color: "var(--color-ink)" }}>
+          Loading...
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black pt-24 px-4">
+    <div
+      className="min-h-screen pt-24 px-4"
+      style={{ backgroundColor: "var(--color-dark)" }}
+    >
       <div className="max-w-4xl mx-auto">
         {/* User Info Header */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8 border border-white/20">
+        <div
+          className="rounded-2xl p-6 mb-8 border-2"
+          style={{
+            backgroundColor: "var(--color-card)",
+            borderColor: "var(--color-border)",
+          }}
+        >
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold"
+              style={{
+                backgroundColor: "var(--color-accent)",
+                color: "var(--color-ink)",
+              }}
+            >
               {user?.email?.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">My Profile</h1>
-              <p className="text-gray-300">{user?.email}</p>
+              <h1
+                className="text-2xl font-bold"
+                style={{ color: "var(--color-ink)" }}
+              >
+                My Profile
+              </h1>
+              <p style={{ color: "var(--color-muted)" }}>{user?.email}</p>
             </div>
           </div>
         </div>
@@ -178,7 +203,10 @@ function UserProfile() {
         {/* Overview - Main Selection Page */}
         {activeTab === "overview" && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white mb-6 text-center">
+            <h2
+              className="text-2xl font-bold mb-6 text-center"
+              style={{ color: "var(--color-ink)" }}
+            >
               Choose an option to continue
             </h2>
 
@@ -186,20 +214,34 @@ function UserProfile() {
               {/* Personal Preference Card */}
               <div
                 onClick={() => navigate("/personal-preference")}
-                className="group bg-gradient-to-br from-pink-600/30 to-purple-600/30 backdrop-blur-lg rounded-2xl p-8 border-2 border-pink-400/50 hover:border-pink-400 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-pink-500/50"
+                className="group rounded-2xl p-8 border-2 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg"
+                style={{
+                  backgroundColor: "var(--color-card)",
+                  borderColor: "var(--color-accent)",
+                  boxShadow: "0 4px 6px rgba(245, 197, 25, 0.1)",
+                }}
               >
                 <div className="text-center">
                   <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
                     ⭐
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h3
+                    className="text-2xl font-bold mb-3"
+                    style={{ color: "var(--color-ink)" }}
+                  >
                     Personal Preference
                   </h3>
-                  <p className="text-gray-200 mb-4 leading-relaxed">
+                  <p
+                    className="mb-4 leading-relaxed"
+                    style={{ color: "var(--color-muted)" }}
+                  >
                     Set your movie genre preferences and customize your
                     experience
                   </p>
-                  <div className="inline-flex items-center text-pink-300 font-medium group-hover:text-pink-200">
+                  <div
+                    className="inline-flex items-center font-medium group-hover:translate-x-1 transition-transform"
+                    style={{ color: "var(--color-accent)" }}
+                  >
                     Configure Preferences
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -222,19 +264,33 @@ function UserProfile() {
               {/* My Reviews Card */}
               <div
                 onClick={() => setActiveTab("my-reviews")}
-                className="group bg-gradient-to-br from-blue-600/30 to-purple-600/30 backdrop-blur-lg rounded-2xl p-8 border-2 border-blue-400/50 hover:border-blue-400 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-blue-500/50"
+                className="group rounded-2xl p-8 border-2 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg"
+                style={{
+                  backgroundColor: "var(--color-card)",
+                  borderColor: "var(--color-accent)",
+                  boxShadow: "0 4px 6px rgba(245, 197, 25, 0.1)",
+                }}
               >
                 <div className="text-center">
                   <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
                     📝
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-3">
+                  <h3
+                    className="text-2xl font-bold mb-3"
+                    style={{ color: "var(--color-ink)" }}
+                  >
                     My Reviews
                   </h3>
-                  <p className="text-gray-200 mb-4 leading-relaxed">
+                  <p
+                    className="mb-4 leading-relaxed"
+                    style={{ color: "var(--color-muted)" }}
+                  >
                     View, add, edit, and manage all your movie reviews
                   </p>
-                  <div className="inline-flex items-center text-blue-300 font-medium group-hover:text-blue-200">
+                  <div
+                    className="inline-flex items-center font-medium group-hover:translate-x-1 transition-transform"
+                    style={{ color: "var(--color-accent)" }}
+                  >
                     Manage Reviews ({userReviews.length})
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -262,17 +318,31 @@ function UserProfile() {
           <div className="flex space-x-4 mb-6">
             <button
               onClick={() => setActiveTab("overview")}
-              className="px-6 py-3 rounded-lg font-medium transition bg-white/10 text-gray-300 hover:bg-white/20"
+              className="px-6 py-3 rounded-lg font-medium transition"
+              style={{
+                backgroundColor: "var(--color-card-hover)",
+                color: "var(--color-ink)",
+                border: `2px solid var(--color-border)`,
+              }}
             >
               ← Back
             </button>
             <button
               onClick={() => setActiveTab("add")}
-              className={`px-6 py-3 rounded-lg font-medium transition ${
+              className="px-6 py-3 rounded-lg font-medium transition"
+              style={
                 activeTab === "add"
-                  ? "bg-purple-600 text-white"
-                  : "bg-white/10 text-gray-300 hover:bg-white/20"
-              }`}
+                  ? {
+                      backgroundColor: "var(--color-accent)",
+                      color: "var(--color-ink)",
+                      border: `2px solid var(--color-accent)`,
+                    }
+                  : {
+                      backgroundColor: "var(--color-card-hover)",
+                      color: "var(--color-ink)",
+                      border: `2px solid var(--color-border)`,
+                    }
+              }
             >
               {editingReview ? "Edit Review" : "Add Review"}
             </button>
@@ -281,11 +351,20 @@ function UserProfile() {
                 setActiveTab("my-reviews");
                 cancelEdit();
               }}
-              className={`px-6 py-3 rounded-lg font-medium transition ${
+              className="px-6 py-3 rounded-lg font-medium transition"
+              style={
                 activeTab === "my-reviews"
-                  ? "bg-purple-600 text-white"
-                  : "bg-white/10 text-gray-300 hover:bg-white/20"
-              }`}
+                  ? {
+                      backgroundColor: "var(--color-accent)",
+                      color: "var(--color-ink)",
+                      border: `2px solid var(--color-accent)`,
+                    }
+                  : {
+                      backgroundColor: "var(--color-card-hover)",
+                      color: "var(--color-ink)",
+                      border: `2px solid var(--color-border)`,
+                    }
+              }
             >
               My Reviews ({userReviews.length})
             </button>
@@ -294,21 +373,40 @@ function UserProfile() {
 
         {/* Add/Edit Review Tab */}
         {activeTab === "add" && (
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-            <h2 className="text-2xl font-bold text-white mb-6">
+          <div
+            className="rounded-2xl p-8 border-2"
+            style={{
+              backgroundColor: "var(--color-card)",
+              borderColor: "var(--color-border)",
+            }}
+          >
+            <h2
+              className="text-2xl font-bold mb-6"
+              style={{ color: "var(--color-ink)" }}
+            >
               {editingReview ? "Edit Movie Review" : "Rate a Movie"}
             </h2>
             <form onSubmit={handleSubmitReview} className="space-y-6">
               {/* Movie Selection */}
               <div>
-                <label className="block text-white font-medium mb-2">
+                <label
+                  className="block font-medium mb-2"
+                  style={{ color: "var(--color-ink)" }}
+                >
                   Select Movie *
                 </label>
                 <select
                   value={selectedMovie || ""}
                   onChange={(e) => setSelectedMovie(e.target.value)}
                   required
-                  className="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2"
+                  style={{
+                    backgroundColor: "var(--color-dark-light)",
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-ink)",
+                    border: `2px solid var(--color-border)`,
+                    focusRingColor: "var(--color-accent)",
+                  }}
                 >
                   <option value="" disabled>
                     -- Please select a movie --
@@ -317,7 +415,7 @@ function UserProfile() {
                     <option
                       key={movie.id}
                       value={movie.id}
-                      className="bg-gray-800"
+                      className="bg-white"
                     >
                       {movie.title} ({movie.year})
                     </option>
@@ -327,7 +425,10 @@ function UserProfile() {
 
               {/* Rating */}
               <div>
-                <label className="block text-white font-medium mb-2">
+                <label
+                  className="block font-medium mb-2"
+                  style={{ color: "var(--color-ink)" }}
+                >
                   Rating (1-10) *
                 </label>
                 <div className="flex items-center space-x-4">
@@ -337,13 +438,26 @@ function UserProfile() {
                     max="10"
                     value={rating}
                     onChange={(e) => setRating(e.target.value)}
-                    className="flex-1 h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 rounded-lg appearance-none cursor-pointer"
+                    style={{
+                      backgroundColor: "var(--color-border)",
+                      accentColor: "var(--color-accent)",
+                    }}
                   />
-                  <span className="text-3xl font-bold text-white bg-purple-600 px-4 py-2 rounded-lg min-w-[60px] text-center">
+                  <span
+                    className="text-3xl font-bold px-4 py-2 rounded-lg min-w-[60px] text-center"
+                    style={{
+                      backgroundColor: "var(--color-accent)",
+                      color: "var(--color-ink)",
+                    }}
+                  >
                     {rating}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <div
+                  className="flex justify-between text-xs mt-1"
+                  style={{ color: "var(--color-muted)" }}
+                >
                   <span>Poor</span>
                   <span>Great</span>
                 </div>
@@ -351,7 +465,10 @@ function UserProfile() {
 
               {/* Comment */}
               <div>
-                <label className="block text-white font-medium mb-2">
+                <label
+                  className="block font-medium mb-2"
+                  style={{ color: "var(--color-ink)" }}
+                >
                   Review *
                 </label>
                 <textarea
@@ -360,7 +477,13 @@ function UserProfile() {
                   required
                   rows="5"
                   placeholder="Share your thoughts about this movie..."
-                  className="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2"
+                  style={{
+                    backgroundColor: "var(--color-dark-light)",
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-ink)",
+                    border: `2px solid var(--color-border)`,
+                  }}
                 />
               </div>
 
@@ -368,7 +491,11 @@ function UserProfile() {
               <div className="flex space-x-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition"
+                  className="flex-1 py-3 px-6 rounded-lg font-medium transition"
+                  style={{
+                    backgroundColor: "var(--color-accent)",
+                    color: "var(--color-ink)",
+                  }}
                 >
                   {editingReview ? "Update Review" : "Submit Review"}
                 </button>
@@ -376,7 +503,12 @@ function UserProfile() {
                   <button
                     type="button"
                     onClick={cancelEdit}
-                    className="px-6 py-3 bg-white/20 text-white rounded-lg font-medium hover:bg-white/30 transition"
+                    className="px-6 py-3 rounded-lg font-medium transition"
+                    style={{
+                      backgroundColor: "var(--color-card-hover)",
+                      color: "var(--color-ink)",
+                      border: `2px solid var(--color-border)`,
+                    }}
                   >
                     Cancel
                   </button>
@@ -390,13 +522,23 @@ function UserProfile() {
         {activeTab === "my-reviews" && (
           <div className="space-y-4">
             {userReviews.length === 0 ? (
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 border border-white/20 text-center">
-                <p className="text-gray-300 text-lg">
+              <div
+                className="rounded-2xl p-12 border-2 text-center"
+                style={{
+                  backgroundColor: "var(--color-card)",
+                  borderColor: "var(--color-border)",
+                }}
+              >
+                <p className="text-lg" style={{ color: "var(--color-muted)" }}>
                   You haven't added any reviews yet
                 </p>
                 <button
                   onClick={() => setActiveTab("add")}
-                  className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition"
+                  className="mt-4 px-6 py-2 rounded-lg transition font-medium"
+                  style={{
+                    backgroundColor: "var(--color-accent)",
+                    color: "var(--color-ink)",
+                  }}
                 >
                   Add your first review
                 </button>
@@ -405,36 +547,60 @@ function UserProfile() {
               userReviews.map((review) => (
                 <div
                   key={review.id}
-                  className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:border-purple-400/50 transition"
+                  className="rounded-2xl p-6 border-2 transition"
+                  style={{
+                    backgroundColor: "var(--color-card)",
+                    borderColor: "var(--color-border)",
+                  }}
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="text-xl font-bold text-white">
+                      <h3
+                        className="text-xl font-bold"
+                        style={{ color: "var(--color-ink)" }}
+                      >
                         {review.movieTitle}
                       </h3>
-                      <p className="text-gray-400 text-sm">
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--color-muted)" }}
+                      >
                         {review.createdAt?.toDate().toLocaleDateString("zh-CN")}
                       </p>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <span className="text-2xl font-bold text-white bg-purple-600 px-3 py-1 rounded-lg">
+                      <span
+                        className="text-2xl font-bold px-3 py-1 rounded-lg"
+                        style={{
+                          backgroundColor: "var(--color-accent)",
+                          color: "var(--color-ink)",
+                        }}
+                      >
                         {review.rating}/10
                       </span>
                     </div>
                   </div>
-                  <p className="text-gray-200 mb-4 leading-relaxed">
+                  <p
+                    className="mb-4 leading-relaxed"
+                    style={{ color: "var(--color-ink)" }}
+                  >
                     {review.comment}
                   </p>
                   <div className="flex space-x-3">
                     <button
                       onClick={() => handleEditReview(review)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition"
+                      className="px-4 py-2 text-white rounded-lg text-sm transition font-medium"
+                      style={{
+                        backgroundColor: "var(--color-accent)",
+                        color: "var(--color-ink)",
+                      }}
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteReview(review.id)}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition"
+                      className="px-4 py-2 text-white rounded-lg text-sm transition font-medium"
+                      style={{ backgroundColor: "#E74C3C", color: "white" }}
                     >
                       Delete
                     </button>
