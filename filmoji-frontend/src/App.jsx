@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import { ToastProvider } from "./components/ToastContext";
 import Home from "./pages/Home";
 import Categories from "./pages/Categories";
+import CategoryDetail from "./pages/CategoryDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -26,6 +27,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/categories" element={<Categories />} />
+          <Route path="/category/:name" element={<CategoryDetail />} />
           <Route path="/reviews" element={<MovieReviews />} />
           <Route path="/movie/:id" element={<MovieDetail />} />
           <Route path="/login" element={<Login />} />
