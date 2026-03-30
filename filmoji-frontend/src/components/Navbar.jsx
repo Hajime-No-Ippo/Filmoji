@@ -54,14 +54,14 @@ function Navbar() {
           <a href={isHome ? "#featured" : "/"} className={`nav-link transition-colors ${tcF}`}>
             Featured
           </a>
-          <a href={isHome ? "#categories" : "/categories"} className={`nav-link transition-colors ${tcF}`}>
-            Top Categories
-          </a>
           <Link to="/categories" className={`nav-link transition-colors ${tcF}`}>
             All Categories
           </Link>
           <Link to="/reviews" className={`nav-link transition-colors ${tcF}`}>
             Reviews
+          </Link>
+          <Link to="/emoji-recommendations" className={`nav-link transition-colors ${tcF}`}>
+            Recommend
           </Link>
         </div>
 
@@ -121,13 +121,7 @@ function Navbar() {
           >
             Featured
           </a>
-          <a
-            href={isHome ? "#categories" : "/categories"}
-            className="nav-link text-[#1C1600]/70"
-            onClick={() => setMenuOpen(false)}
-          >
-            Top Categories
-          </a>
+          
           <Link
             to="/categories"
             className="nav-link text-[#1C1600]/70"
@@ -141,6 +135,13 @@ function Navbar() {
             onClick={() => setMenuOpen(false)}
           >
             Reviews
+          </Link>
+          <Link
+            to="/emoji-recommendations"
+            className="nav-link text-[#1C1600]/70"
+            onClick={() => setMenuOpen(false)}
+          >
+            Recommend
           </Link>
 
           <hr className="border-border" />

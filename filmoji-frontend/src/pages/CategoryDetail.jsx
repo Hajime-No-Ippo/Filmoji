@@ -13,8 +13,8 @@ function CategoryDetail() {
       <div className="min-h-screen flex items-center justify-center text-white pt-20">
         <div className="text-center">
           <p className="text-xl mb-4">Category not found.</p>
-          <Link to="/#categories" className="accent-link">
-            ← Back to Top Categories
+          <Link to="/categories" className="accent-link">
+            ← Back to Categories
           </Link>
         </div>
       </div>
@@ -32,10 +32,10 @@ function CategoryDetail() {
       <div className="container-main px-4">
         {/* Back button */}
         <Link
-          to="/#categories"
+          to="/categories"
           className="nav-link flex items-center gap-2 text-sm mb-8 inline-block"
         >
-          ← Back to Top Categories
+          ← Back to Categories
         </Link>
 
         {/* Category title */}

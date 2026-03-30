@@ -14,6 +14,7 @@ import UserProfile from "./pages/UserProfile";
 import MovieReviews from "./pages/MovieReviews";
 import MovieDetail from "./pages/MovieDetail";
 import Recommendations from "./pages/Recommendations";
+import EmojiRecommendations from "./pages/EmojiRecommendations";
 import PersonalPreference from "./pages/PersonalPreference";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
@@ -65,6 +66,7 @@ function App() {
             }
           />
           <Route path="/recommendations" element={<Recommendations />} />
+          <Route path="/emoji-recommendations" element={<EmojiRecommendations />} />
           <Route path="/forget" element={<ForgotPassword />} />
         </Routes>
       </main>
