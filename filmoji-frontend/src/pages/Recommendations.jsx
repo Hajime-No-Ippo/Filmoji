@@ -1,5 +1,6 @@
 import { useSearchParams, Link } from 'react-router-dom'
 import { featuredMovies } from '../data/movies'
+import { useMoviesWithPosters } from '../hooks/useMoviesWithPosters'
 import MovieCard from '../components/MovieCard'
 
 const moodLabels = {
@@ -25,6 +26,7 @@ function Recommendations() {
   const [searchParams] = useSearchParams()
   const mood = searchParams.get('mood') || ''
   const label = moodLabels[mood] || mood
+  const { movies, loading } = useMoviesWithPosters(featuredMovies)
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-6">
@@ -38,12 +40,15 @@ function Recommendations() {
           Movies picked for your current mood
         </p>
 
-        {/* Placeholder — replace with real recommendation logic */}
-        <div className="grid-movies">
-          {featuredMovies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
-          ))}
-        </div>
+        {loading ? (
+          <div>Updating movie posters...</div>
+        ) : (
+          <div className="grid-movies">
+            {movies.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

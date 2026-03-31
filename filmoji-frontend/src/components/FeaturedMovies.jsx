@@ -1,56 +1,58 @@
-import { useState, useEffect } from 'react';
 import { featuredMovies } from '../data/movies'
+import { useMoviesWithPosters } from '../hooks/useMoviesWithPosters'
+import CardSwap, { Card } from './CardSwap/CardSwap'
 import MovieCard from './MovieCard'
 
 function FeaturedMovies() {
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Replace 'YOUR_API_KEY' with your actual OMDb key
-  const API_KEY = '5194e81b'; 
-  // const query = 'Space'; 
-
-  useEffect(() => {
-    const fetchSpecificMovies = async () => {
-      try {
-        // Create an array of fetch promises based on your movies.js titles
-        const moviePromises = featuredMovies.map(movie =>
-          fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(movie.title)}&apikey=${API_KEY}`)
-            .then(res => res.json())
-        );
-
-        // Wait for all movies to come back from the API
-        const results = await Promise.all(moviePromises);
-
-        // Format the OMDb data to match your component's needs
-        const formattedMovies = results.map((data, index) => ({
-          id: featuredMovies[index].id,
-          title: data.Title || featuredMovies[index].title,
-          year: data.Year || featuredMovies[index].year,
-          // Use OMDb poster, fallback to your local one if "N/A"
-          poster: data.Poster !== "N/A" ? data.Poster : featuredMovies[index].poster,
-          rating: data.imdbRating || "N/A",
-          genres: data.Genre ? data.Genre.split(", ") : []
-        }));
-
-        setMovies(formattedMovies);
-      } catch (error) {
-        console.error("Error fetching movies:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSpecificMovies();
-  }, []);
+  const { movies, loading } = useMoviesWithPosters(featuredMovies)
 
   if (loading) return <div className="container-main">Updating movie posters...</div>;
 
 
   return (
+    <div>
+    <section id = "description" className = "section">
+
+      <div
+        className="overflow-hidden border border-border bg-card m-7"
+        style={{ borderRadius: '1.5rem', display: 'flex', alignItems: 'center', minHeight: '600px' }}
+      >
+        {/* Left Section: title and description */}
+        <div style={{ flex: '0 0 60%', padding: '3rem 2.5rem' }}>
+          <h1 className="section-title">Get your favourite Movie from Filmoji</h1>
+          <p className="section-subtitle">Try the latest recommendation function!</p>
+        </div>
+
+        {/* Right Section: CardSwap effect */}
+        <div style={{ flex: 1, height: '600px', position: 'relative' }}>
+          <CardSwap
+            cardDistance={60}
+            verticalDistance={70}
+            delay={5000}
+            pauseOnHover={false}
+          >
+            <Card>
+              <h3></h3>
+              <p></p>
+            </Card>
+            <Card>
+              <h3></h3>
+              <p></p>
+            </Card>
+            <Card>
+              <h3></h3>
+              <p></p>
+            </Card>
+          </CardSwap>
+        </div>
+      </div>
+    </section>
+
     <section id="featured" className="section">
       <div className="container-main">
-        <h2 className="section-title">Featured Movies</h2>
+        <h2 className="section-title"
+        style ={{}}>
+          Featured Movies</h2>
         <p className="section-subtitle">Handpicked recommendations just for you</p>
         <div className="grid-movies">
           {movies.map((movie) => (
@@ -59,6 +61,7 @@ function FeaturedMovies() {
         </div>
       </div>
     </section>
+    </div>
   )
 }
 

@@ -12,6 +12,19 @@
   --color-muted: #88806A;          /* warm muted text */
   --color-border: #DDD080;         /* warm yellow-tinted border */
   --color-ink: #1C1600;            /* main body text */
+
+  
+  /* Mood palette – used in Hero emoji blocks + genre BubbleMenu */
+  --color-mood-yellow:       #F5C519;  /* happy, festive, laughing, comedy */
+  --color-mood-yellow-hover: #E9B300;
+  --color-mood-blue:         #3B5BDB;  /* cool, sad, peaceful, overwhelmed */
+  --color-mood-navy:         #1A3A8F;  /* angry, mindblown, sci-fi */
+  --color-mood-navy-hover:   #3B5BDB;
+  --color-mood-green:        #2D6A4F;  /* excited, bored, scared, thoughtful, horror */
+  --color-mood-green-hover:  #24543F;
+  --color-mood-orange:       #E05A2B;  /* romantic, emotional, tense, drama */
+  --color-mood-orange-hover: #C94D22;
+
   --font-display: 'Michroma', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 }
@@ -112,3 +125,5 @@ body {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
   }
 }
+
+@import './components/BubbleMenu/BubbleMenu.css';

@@ -1,10 +1,14 @@
 import { useParams, Link } from 'react-router-dom'
 import { featuredMovies } from '../data/movies'
+import { useMoviesWithPosters } from '../hooks/useMoviesWithPosters'
 import { ContainerScroll } from '../components/ContainerScroll'
 
 function MovieDetail() {
   const { id } = useParams()
-  const movie = featuredMovies.find((m) => m.id === parseInt(id))
+  const { movies, loading } = useMoviesWithPosters(featuredMovies)
+  const movie = loading
+    ? featuredMovies.find((m) => m.id === parseInt(id))
+    : movies.find((m) => m.id === parseInt(id))
 
   if (!movie) {
     return (
@@ -103,6 +107,13 @@ function MovieDetail() {
           </div>
         </div>
       </ContainerScroll>
+
+      <>
+      <div>
+        <p>{movie.title} Ratings & Reviews:</p>
+        
+      </div>
+      </>
     </div>
   )
 }

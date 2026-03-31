@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import MovieCard from '../components/MovieCard'
+import RecommendationGenreStep from '../components/RecommendationGenreStep'
 
 // ── Step 1: Categories ────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { id: 1, name: 'Sci-Fi',     emoji: '🚀' },
-  { id: 2, name: 'Drama',      emoji: '🎭' },
-  { id: 3, name: 'Comedy',     emoji: '😂' },
-  { id: 4, name: 'Horror',     emoji: '👻' },
+  { id: 1, name: 'Sci-Fi', emoji: '🚀' },
+  { id: 2, name: 'Drama', emoji: '🎭' },
+  { id: 3, name: 'Comedy', emoji: '😂' },
+  { id: 4, name: 'Horror', emoji: '👻' },
+  { id: 5, name: 'Intense', emoji: '🔥' },
+  { id: 6, name: 'Thoughtful', emoji: '🤔' },
+  { id: 7, name: 'Adventure', emoji: '🚀' },
 ]
 
 // ── Step 2: Swipe cards (sample prompts per genre) ────────────────────────────
@@ -67,50 +71,6 @@ function StepBar({ step }) {
   )
 }
 
-// ── Step 1: Category picker ───────────────────────────────────────────────────
-function Step1({ onNext }) {
-  const [selected, setSelected] = useState([])
-
-  const toggle = (name) =>
-    setSelected((prev) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
-    )
-
-  return (
-    <div>
-      <h1 className="text-3xl font-bold text-ink mb-2">What do you feel like watching?</h1>
-      <p className="section-subtitle mb-8">Pick your favourite genres</p>
-
-      <div className="grid grid-cols-2 gap-4 mb-10 max-w-2xl justify-center items-center">
-        {CATEGORIES.map(({ name, emoji }) => (
-          <button
-            key={name}
-            onClick={() => toggle(name)}
-            className={`relative flex flex-col items-center justify-center gap-3 aspect-square rounded-3xl border-2 transition-all duration-200 cursor-pointer
-              ${selected.includes(name)
-                ? 'border-accent bg-accent/20 shadow-xl shadow-accent/20'
-                : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20'}`}
-          >
-            {selected.includes(name) && (
-              <span className="absolute top-4 right-4 w-6 h-6 rounded-full bg-accent flex items-center justify-center text-white text-xs font-bold">✓</span>
-            )}
-            <span className="text-6xl">{emoji}</span>
-            <span className="text-lg font-semibold text-ink">{name}</span>
-          </button>
-        ))}
-      </div>
-
-      <button
-        disabled={selected.length === 0}
-        onClick={() => onNext(selected)}
-        className="px-8 py-3 rounded-full bg-accent text-white font-semibold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent/90 transition-all cursor-pointer"
-      >
-        Next →
-      </button>
-    </div>
-  )
-}
-
 // ── Step 2: Tinder-style swipe ────────────────────────────────────────────────
 function Step2({ categories, onNext }) {
   const allCards = categories.flatMap((cat) =>
@@ -151,7 +111,7 @@ function Step2({ categories, onNext }) {
       {/* Card */}
       <div className="flex justify-center mb-10">
         <div
-          className={`relative w-72 h-96 rounded-3xl border border-white/10 bg-white/5 flex flex-col items-center justify-center gap-4 p-8 text-center shadow-2xl transition-all duration-300
+          className={`relative w-72 h-96 rounded-3xl border border-white/10 bg-white flex flex-col items-center justify-center gap-4 p-8 text-center shadow-2xl transition-all duration-300
             ${anim === 'right' ? 'translate-x-24 opacity-0 rotate-12' : ''}
             ${anim === 'left'  ? '-translate-x-24 opacity-0 -rotate-12' : ''}`}
         >
@@ -223,51 +183,62 @@ function Step3({ likedVibes }) {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-ink mb-2">One last thing — how are you feeling?</h1>
-      <p className="section-subtitle mb-8">
-        {likedVibes.length > 0
-          ? `Based on your ${likedVibes.length} liked vibe${likedVibes.length > 1 ? 's' : ''}, pick your mood`
-          : 'Pick your current mood'}
-      </p>
+      {/* Mood selector — compact section */}
+      <section className="mb-10">
+        <h1 className="text-3xl font-bold text-ink mb-1">How are you feeling?</h1>
+        <p className="section-subtitle mb-6">
+          {likedVibes.length > 0
+            ? `Based on your ${likedVibes.length} liked vibe${likedVibes.length > 1 ? 's' : ''}`
+            : 'Pick your current mood to get recommendations'}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {EMOJIS.map(({ emoji, label }) => (
+            <button
+              key={emoji}
+              onClick={() => pick(emoji)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all cursor-pointer
+                ${selected === emoji
+                  ? 'border-accent bg-accent text-ink font-semibold scale-105'
+                  : 'border-white/10 bg-white/5 text-muted hover:bg-white/10 hover:text-ink'}`}
+            >
+              <span className="text-lg">{emoji}</span>
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
 
-      {/* Emoji grid */}
-      <div className="flex flex-wrap gap-3 mb-12">
-        {EMOJIS.map(({ emoji, label }) => (
-          <button
-            key={emoji}
-            onClick={() => pick(emoji)}
-            className={`flex flex-col items-center gap-1 px-4 py-3 rounded-xl border transition-all cursor-pointer
-              ${selected === emoji
-                ? 'border-accent bg-accent/20 scale-105'
-                : 'border-white/10 bg-white/5 hover:bg-white/10'}`}
-          >
-            <span className="text-2xl">{emoji}</span>
-            <span className="text-[10px] text-muted">{label}</span>
-          </button>
-        ))}
-      </div>
+      {/* Results section */}
+      <section>
+        {loading && (
+          <p className="text-muted text-sm">Finding movies for you...</p>
+        )}
+        {error && (
+          <p className="text-red-400 text-sm">Could not load recommendations: {error}</p>
+        )}
+        {!loading && !error && selected && movies.length === 0 && (
+          <p className="text-muted text-sm">No movies found.</p>
+        )}
+        {!selected && !loading && (
+          <p className="text-muted text-sm">Select a mood above to see recommendations.</p>
+        )}
 
-      {loading && <p className="text-muted text-sm">Finding movies for you...</p>}
-      {error   && <p className="text-red-400 text-sm">Could not load recommendations: {error}</p>}
-      {!loading && !error && selected && movies.length === 0 && (
-        <p className="text-muted text-sm">No movies found.</p>
-      )}
-
-      {movies.length > 0 && (
-        <section>
-          <h2 className="text-xl font-semibold text-ink mb-6">Top picks for {selected}</h2>
-          <div className="grid-movies">
-            {movies.map((movie) => (
-              <div key={movie.id}>
-                <MovieCard movie={movie} />
-                {movie.whyRecommended && (
-                  <p className="text-xs text-muted mt-2 px-1">{movie.whyRecommended}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+        {movies.length > 0 && (
+          <>
+            <h2 className="text-xl font-semibold text-ink mb-6">Top picks for {selected}</h2>
+            <div className="grid-movies">
+              {movies.map((movie) => (
+                <div key={movie.id}>
+                  <MovieCard movie={movie} />
+                  {movie.whyRecommended && (
+                    <p className="text-xs text-muted mt-2 px-1">{movie.whyRecommended}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
     </div>
   )
 }
@@ -295,7 +266,7 @@ function EmojiRecommendations() {
 
         <StepBar step={step} />
 
-        {step === 1 && <Step1 onNext={handleStep1} />}
+        {step === 1 && <RecommendationGenreStep onNext={handleStep1} />}
         {step === 2 && <Step2 categories={categories} onNext={handleStep2} />}
         {step === 3 && <Step3 likedVibes={likedVibes} />}
       </div>

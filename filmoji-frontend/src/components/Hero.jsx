@@ -9,37 +9,37 @@ const columns = [
   {
     initialY: 0,
     blocks: [
-      { emoji: '😊', mood: 'happy',     color: '#F5C519' },
-      { emoji: '😡', mood: 'angry',     color: '#1A3A8F' },
-      { emoji: '😎', mood: 'cool',      color: '#3B5BDB' },
-      { emoji: '🥳', mood: 'festive',   color: '#F5C519' },
+      { emoji: '😊', mood: 'happy',     color: 'var(--color-mood-yellow)' },
+      { emoji: '😡', mood: 'angry',     color: 'var(--color-mood-navy)'   },
+      { emoji: '😎', mood: 'cool',      color: 'var(--color-mood-blue)'   },
+      { emoji: '🥳', mood: 'festive',   color: 'var(--color-mood-yellow)' },
     ],
   },
   {
     initialY: -60,
     blocks: [
-      { emoji: '😢', mood: 'sad',       color: '#3B5BDB' },
-      { emoji: '😍', mood: 'romantic',  color: '#E05A2B' },
-      { emoji: '🤩', mood: 'excited',   color: '#2D6A4F' },
-      { emoji: '🥱', mood: 'bored',     color: '#2D6A4F' },
+      { emoji: '😢', mood: 'sad',       color: 'var(--color-mood-blue)'   },
+      { emoji: '😍', mood: 'romantic',  color: 'var(--color-mood-orange)' },
+      { emoji: '🤩', mood: 'excited',   color: 'var(--color-mood-green)'  },
+      { emoji: '🥱', mood: 'bored',     color: 'var(--color-mood-green)'  },
     ],
   },
   {
     initialY: 40,
     blocks: [
-      { emoji: '😱', mood: 'scared',    color: '#2D6A4F' },
-      { emoji: '🥺', mood: 'emotional', color: '#E05A2B' },
-      { emoji: '🤯', mood: 'mindblown', color: '#1A3A8F' },
-      { emoji: '😌', mood: 'peaceful',  color: '#3B5BDB' },
+      { emoji: '😱', mood: 'scared',    color: 'var(--color-mood-green)'  },
+      { emoji: '🥺', mood: 'emotional', color: 'var(--color-mood-orange)' },
+      { emoji: '🤯', mood: 'mindblown', color: 'var(--color-mood-navy)'   },
+      { emoji: '😌', mood: 'peaceful',  color: 'var(--color-mood-blue)'   },
     ],
   },
   {
     initialY: -20,
     blocks: [
-      { emoji: '😂', mood: 'laughing',     color: '#F5C519' },
-      { emoji: '🤔', mood: 'thoughtful',      color: '#2D6A4F' },
-      { emoji: '😤', mood: 'tense',        color: '#E05A2B' },
-      { emoji: '🫠', mood: 'overwhelmed',  color: '#3B5BDB' },
+      { emoji: '😂', mood: 'laughing',    color: 'var(--color-mood-yellow)' },
+      { emoji: '🤔', mood: 'thoughtful',  color: 'var(--color-mood-green)'  },
+      { emoji: '😤', mood: 'tense',       color: 'var(--color-mood-orange)' },
+      { emoji: '🫠', mood: 'overwhelmed', color: 'var(--color-mood-blue)'   },
     ],
   },
 ]
@@ -114,6 +114,7 @@ function Hero() {
                 key={block.mood}
                 layoutId={`emoji-block-${block.mood}`}
                 onClick={(e) => handleClick(e, block)}
+                // Reuse this radius as main theme
                 style={{ backgroundColor: block.color, borderRadius: '1.5rem' }}
                 className="flex items-center justify-center h-52 w-full cursor-pointer border-none shrink-0 hover:brightness-110 hover:scale-[1.03] transition-all duration-200 group"
               >

@@ -172,7 +172,7 @@ function UserProfile() {
       <div className="max-w-4xl mx-auto">
         {/* User Info Header */}
         <div
-          className="rounded-2xl p-6 mb-8 border-2"
+          className="rounded-2xl p-6 mb-8 shadow-lg "
           style={{
             backgroundColor: "var(--color-card)",
             borderColor: "var(--color-border)",
