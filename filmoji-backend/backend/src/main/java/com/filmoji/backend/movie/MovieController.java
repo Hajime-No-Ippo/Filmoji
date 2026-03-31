@@ -1,6 +1,5 @@
 package com.filmoji.backend.movie;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,14 +20,14 @@ public class MovieController {
     // Quick test endpoint: adds one movie if it's not already there
     @PostMapping("/debug/seed")
     public Movie seedOne() {
-        return movies.findByTmdbId(550).orElseGet(() ->
-                movies.save(new Movie(
-                        550,
-                        "Fight Club",
-                        "An insomniac office worker and a soap maker form an underground fight club.",
-                        LocalDate.of(1999, 10, 15)
-                ))
-        );
+        return movies.findByTmdbId(550).orElseGet(() -> {
+            Movie m = new Movie();
+            m.setTmdbId(550);
+            m.setTitle("Fight Club");
+            m.setSynopsis("An insomniac office worker and a soap maker form an underground fight club.");
+            m.setReleaseYear(1999);
+            return movies.save(m);
+        });
     }
 
     // Lists all movies in the database
