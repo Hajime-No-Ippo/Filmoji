@@ -39,7 +39,7 @@ function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${showBg ? "bg-dark/95 backdrop-blur-sm shadow-sm shadow-border" : "bg-transparent"}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${showBg ? "bg-dark/95 backdrop-blur-sm shadow-lg shadow-black/10" : "bg-transparent"}`}
     >
       <div className="container-main px-6 py-4 flex items-center justify-between">
         <Link
@@ -55,7 +55,7 @@ function Navbar() {
             Featured
           </a>
           <Link to="/categories" className={`nav-link transition-colors ${tcF}`}>
-            All Categories
+            Top Categories
           </Link>
           <Link to="/reviews" className={`nav-link transition-colors ${tcF}`}>
             Reviews
