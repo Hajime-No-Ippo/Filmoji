@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { db } from "../../firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { featuredMovies } from "../data/movies";
 
 function MovieReviews() {
-  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [searchParams] = useSearchParams()
+  const [selectedMovie, setSelectedMovie] = useState(searchParams.get('movieId'));
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
@@ -250,7 +252,7 @@ function MovieReviews() {
                           >
                             {review.createdAt
                               ?.toDate()
-                              .toLocaleDateString("zh-CN", {
+                              .toLocaleDateString("en-EN", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",

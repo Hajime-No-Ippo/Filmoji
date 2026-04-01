@@ -76,7 +76,6 @@ public class MovieController {
      * 
      */
     @GetMapping("/{id}/trailer")
-
     public ResponseEntity<Map<String, Object>> getTrailerKey(@PathVariable Integer id) {
         return movies.findById(id)
                 .map(movie -> {

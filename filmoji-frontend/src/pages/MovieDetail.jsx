@@ -1,7 +1,11 @@
-import { useParams, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { featuredMovies } from '../data/movies'
-import { useMoviesWithPosters } from '../hooks/useMoviesAPIs'
+import { useMoviesWithPosters, useMoviesTrailer } from '../hooks/useMoviesAPIs'
 import { ContainerScroll } from '../components/ContainerScroll'
+import ReviewSnippetCard from '../components/ReviewSnippetCard'
+import { db } from '../../firebase'
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore'
 
 function MovieDetail() {
   const { id } = useParams()
@@ -9,6 +13,21 @@ function MovieDetail() {
   const movie = loading
     ? featuredMovies.find((m) => m.id === parseInt(id))
     : movies.find((m) => m.id === parseInt(id))
+  const { trailerKey: fetchedTrailerKey, loading: trailerLoading } = useMoviesTrailer(movie?.id)
+  const trailerKey = fetchedTrailerKey ?? 'dQw4w9WgXcQ' // TODO: remove fallback once backend returns trailerKey
+  const navigate = useNavigate()
+
+  const [reviews, setReviews] = useState([])
+  useEffect(() => {
+    if (!movie?.id) return
+    const q = query(
+      collection(db, 'reviews'),
+      where('movieId', '==', movie.id),
+      orderBy('createdAt', 'desc'),
+      limit(3)
+    )
+    getDocs(q).then((snap) => setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() }))))
+  }, [movie?.id])
 
   if (!movie) {
     return (
@@ -23,6 +42,9 @@ function MovieDetail() {
 
   const titleComponent = (
     <div className="pt-24 pb-4 px-4">
+      <Link to="/" className="nav-link flex items-center gap-2 text-sm mb-6 inline-block">
+        ← Back
+      </Link>
       <div className="flex flex-wrap justify-center gap-2 mb-4">
         {movie.genres.map((g) => (
           <span key={g} className="text-xs px-3 py-1 rounded-full border border-accent text-accent uppercase tracking-widest">
@@ -46,74 +68,73 @@ function MovieDetail() {
 
   return (
     <div className="bg-dark min-h-screen">
-      <div className="absolute top-6 left-6 z-10">
-        <Link to="/" className="nav-link flex items-center gap-2 text-sm">
-          ← Back
-        </Link>
-      </div>
-
+      {/* Controller Pad, can be fullsize render the Trailer now */}
       <ContainerScroll titleComponent={titleComponent}>
-        {/* Card content */}
-        <div className="h-full w-full flex flex-col md:flex-row gap-6 p-4 md:p-6 text-white">
-          {/* Poster */}
-          <img
-            src={movie.poster}
-            alt={movie.title}
-            className="w-full md:w-48 h-60 md:h-full object-cover rounded-xl shrink-0"
-          />
+        {/* Card content — trailer full size, links overlaid at bottom */}
+        <div className="relative h-full w-full overflow-hidden rounded-xl bg-black">
 
-          {/* Info */}
-          <div className="flex flex-col justify-between flex-1 overflow-auto">
-            <div>
-              <h2 className="text-xl font-bold mb-1">{movie.title}</h2>
-              <p className="text-white/50 text-sm mb-4">{movie.year} · {movie.genres.join(', ')}</p>
-              <p className="text-white/70 text-sm leading-relaxed mb-6">
-                A cinematic masterpiece that has captivated audiences worldwide.
-                Explore themes of {movie.genres.join(' and ').toLowerCase()} in this
-                unforgettable journey.
-              </p>
+          {/* Trailer — full size */}
+          {trailerLoading ? (
+            <div className="w-full h-full flex items-center justify-center text-white/40 text-sm">
+              Loading trailer...
             </div>
-
-            {/* Stats row */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white/5 rounded-xl p-3 text-center">
-                <p className="text-yellow-400 text-2xl font-bold">{movie.rating}</p>
-                <p className="text-white/40 text-xs mt-1">IMDb</p>
-              </div>
-              <div className="bg-white/5 rounded-xl p-3 text-center">
-                <p className="text-accent text-2xl font-bold">{movie.year}</p>
-                <p className="text-white/40 text-xs mt-1">Year</p>
-              </div>
-              <div className="bg-white/5 rounded-xl p-3 text-center">
-                <p className="text-white text-lg font-bold">{movie.genres[0]}</p>
-                <p className="text-white/40 text-xs mt-1">Genre</p>
-              </div>
+          ) : trailerKey ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${trailerKey}`}
+              title={`${movie.title} trailer`}
+              allowFullScreen
+              className="w-full h-full"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-white/40 text-sm">
+              No trailer available.
             </div>
-
-            <div className="flex gap-3 mt-4">
-              <Link
-                to="/reviews"
-                className="flex-1 text-center py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors no-underline"
-              >
-                Read Reviews
-              </Link>
-              <Link
-                to="/"
-                className="flex-1 text-center py-2 rounded-lg border border-white/20 hover:bg-white/10 text-white text-sm transition-colors no-underline"
-              >
-                More Movies
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
       </ContainerScroll>
 
-      <>
-      <div>
-        <p>{movie.title} Ratings & Reviews:</p>
+      {/* UpComing functions, we will render reviews and rating details below the pad, also do the options */}
 
-      </div>
-      </>
+      <div className="pt-24 pb-20 px-6 min-h-screen">
+        
+
+          {/* Links overlay at bottom */}
+          <div className="w-full relative">
+            <Link
+              to="/reviews"
+              className="flex-1 text-center py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors no-underline"
+            >
+              Read Reviews
+            </Link>
+            <Link
+              to="/"
+              className="flex-1 text-center py-2 rounded-lg border border-white/20 hover:bg-white/10 text-white text-sm transition-colors no-underline"
+            >
+              More Movies
+            </Link> 
+          </div>
+          
+
+          {/* Rating and Reviews Sections */}
+          <section id="reviews" className="section">
+            <h3 className="text-3xl font-bold mb-6">{movie.title} Ratings & Reviews</h3>
+            {reviews.length === 0 ? (
+              <p className="text-muted text-sm">No reviews yet.</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {reviews.map((review) => (
+                  <ReviewSnippetCard key={review.id} review={review} movieId={movie.id} />
+                ))}
+                <button
+                  onClick={() => navigate(`/reviews?movieId=${movie.id}`)}
+                  className="text-sm text-accent hover:text-accent-hover text-left mt-1"
+                >
+                  See all reviews →
+                </button>
+              </div>
+            )}
+          </section>
+        </div>
     </div>
   )
 }
