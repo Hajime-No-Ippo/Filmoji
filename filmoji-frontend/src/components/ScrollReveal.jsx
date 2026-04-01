@@ -13,13 +13,17 @@ const ScrollReveal = ({
   blurStrength = 3,
   containerClassName = '',
   textClassName = '',
-  rotationEnd = 'top 30%',
-  wordAnimationEnd = 'top 30%'
+  rotationEnd = 'bottom 20%',
+  wordAnimationEnd = 'bottom 20%'
 }) => {
   const containerRef = useRef(null);
 
   const splitText = useMemo(() => {
-    const text = typeof children === 'string' ? children : '';
+    const text = typeof children === 'string'
+      ? children
+      : Array.isArray(children)
+        ? children.map((c) => (typeof c === 'string' ? c : '')).join('')
+        : '';
     return text.split(/(\s+)/).map((word, index) => {
       if (word.match(/^\s+$/)) return word;
       return (
@@ -48,7 +52,8 @@ const ScrollReveal = ({
             scroller,
             start: 'top bottom',
             end: rotationEnd,
-            scrub: 0.8
+            scrub: 0.8,
+            markers: true
           }
         }
       );
@@ -96,9 +101,9 @@ const ScrollReveal = ({
   }, [scrollContainerRef, enableBlur, baseRotation, baseOpacity, rotationEnd, wordAnimationEnd, blurStrength]);
 
   return (
-    <h2 ref={containerRef} className={`my-5 ${containerClassName}`}>
+    <div ref={containerRef} className={`my-5 ${containerClassName}`}>
       <p className={textClassName}>{splitText}</p>
-    </h2>
+    </div>
   );
 };
 

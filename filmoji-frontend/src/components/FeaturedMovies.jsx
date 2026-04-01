@@ -31,17 +31,25 @@ function FeaturedMovies() {
             delay={5000}
             pauseOnHover={false}
           >
+            {/** Place Holder
+             * Could be place any content in the cards for effects
+             */}
             <Card>
-              <h3></h3>
-              <p></p>
             </Card>
+
             <Card>
-              <h3></h3>
-              <p></p>
             </Card>
+
             <Card>
-              <h3></h3>
-              <p></p>
+            </Card>
+
+            <Card>
+            </Card>
+
+            <Card>
+            </Card>
+            
+            <Card>
             </Card>
           </CardSwap>
         </div>

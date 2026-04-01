@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { featuredMovies } from '../data/movies'
+import { useMoviesTrailer } from '../hooks/useMoviesAPIs'
 
 // ── Fan geometry ─────────────────────────────────────────────────────────────
 const CX = 100, CY = 400, R1 = 128, R2 = 318
@@ -40,6 +41,10 @@ export default function MoodRecommendations({ emoji = '😊', color = '#F5C519',
   const movies = featuredMovies.slice(0, 5)
   const [selectedIdx, setSelectedIdx] = useState(0)
   const selected = movies[selectedIdx]
+  const { trailerKey, loading: trailerLoading } = useMoviesTrailer(selected.id)
+
+  // TODO: remove this test line once backend is ready   
+  const testTrailerKey = 'dQw4w9WgXcQ'
 
   return (
     <div className="min-h-screen bg-white flex items-stretch">
@@ -130,18 +135,24 @@ export default function MoodRecommendations({ emoji = '😊', color = '#F5C519',
           tone, pacing, and emotional arc are a natural match for how you're feeling.
         </p>
 
-        {/* Trailer placeholder */}
-        <div
-          className="rounded-2xl flex items-center justify-center mb-8 cursor-pointer hover:brightness-[0.97] transition-all"
-          style={{ backgroundColor: '#e9eaec', height: 172 }}
-        >
-          <div className="flex flex-col items-center gap-2 text-ink/30">
-            <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-              <circle cx="22" cy="22" r="22" fill="currentColor" fillOpacity="0.12" />
-              <polygon points="18,14 33,22 18,30" fill="currentColor" fillOpacity="0.45" />
-            </svg>
-            <span className="text-xs tracking-widest uppercase">Trailer</span>
-          </div>
+        {/* Trailer */}
+        <div className="rounded-2xl overflow-hidden mb-8" style={{ height: 172 }}>
+          {trailerLoading ? (
+            <div className="w-full h-full flex items-center justify-center bg-black/5 text-sm text-ink/40">
+              Loading trailer...
+            </div>
+          ) : trailerKey ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${testTrailerKey}`}
+              // title={`${selected.title} trailer`}
+              allowFullScreen
+              className="w-full h-full"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-black/5 text-sm text-ink/40">
+              No trailer available.
+            </div>
+          )}
         </div>
 
         <div>

@@ -69,6 +69,8 @@ function Hero() {
   const { scrollY } = useScroll()
   const [expanded, setExpanded] = useState(null)   // { emoji, mood, color, rect }
   const selected = movies[0]
+  const trailerKey = 'S_Pd2pGkq54' // TODO: remove fallback once backend returns trailerKey
+  const trailerLoading = false
 
   // Parallax activates once the emoji section scrolls into view (~1 viewport down)
   const y0 = useTransform(scrollY, [400, 1600], [0,  -70])
@@ -239,15 +241,30 @@ function Hero() {
                 {/* Trailer placeholder */}
                 <div
                   className="rounded-2xl flex items-center justify-center mb-8 cursor-pointer hover:brightness-[0.97] transition-all"
-                  style={{ backgroundColor: '#e9eaec', height: 172 }}
+                  style={{ backgroundColor: '#e9eaec', height: 372 }}
                 >
-                  <div className="flex flex-col items-center gap-2 text-ink/30">
+                  {/* <div className="flex flex-col items-center gap-2 text-ink/30">
                     <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
                       <circle cx="22" cy="22" r="22" fill="currentColor" fillOpacity="0.12" />
                       <polygon points="18,14 33,22 18,30" fill="currentColor" fillOpacity="0.45" />
                     </svg>
                     <span className="text-xs tracking-widest uppercase">Trailer</span>
-                  </div>
+                  </div> */}
+                  {trailerLoading ? (
+                    <div className="w-full h-full flex items-center justify-center text-white/40 text-sm">
+                      Loading trailer...
+                    </div>
+                  ) : trailerKey ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${trailerKey}`}
+                      allowFullScreen
+                      className="w-full h-full"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white/40 text-sm">
+                      No trailer available.
+                    </div>
+                  )}
                 </div>
 
                 <Link

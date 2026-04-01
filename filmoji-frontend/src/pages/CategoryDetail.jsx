@@ -1,7 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { featuredMovies } from "../data/movies";
 import { categories } from "../data/categories";
-import ScrollReveal from "../components/ScrollReveal";
 
 function CategoryDetail() {
   const { name } = useParams();
@@ -39,16 +38,12 @@ function CategoryDetail() {
         </Link>
 
         {/* Category title */}
-        <ScrollReveal textClassName="text-ink font-bold text-3xl md:text-4xl mb-2">
+        <h1 className="text-ink font-bold text-3xl md:text-4xl mb-2">
           {category.emoji} {decodedName}
-        </ScrollReveal>
-        <ScrollReveal
-          textClassName="section-subtitle mb-4"
-          baseRotation={0}
-          enableBlur={false}
-        >
+        </h1>
+        <p className="section-subtitle mb-4">
           Top 5 Highest Rated {decodedName} Movies
-        </ScrollReveal>
+        </p>
 
         {/* Ranking list */}
         {topMovies.length > 0 ? (
