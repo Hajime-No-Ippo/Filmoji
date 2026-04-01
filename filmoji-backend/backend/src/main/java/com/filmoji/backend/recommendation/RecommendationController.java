@@ -28,6 +28,23 @@ public class RecommendationController {
         this.recommendationService = recommendationService;
     }
 
+    /**
+     * 
+     * @param principal Object: FilmojiUserPrincipal, includes onboarding status, UUID, user details
+     * @param body Requests: Seemed Like emoji && content of userInput
+     * @return A ResponseEntity: Stuctured with A List contains several Mapping relationship with 
+     * ```java
+     *  public RecommendationService(MovieRepository movieRepository,
+                                  EmbeddingService embeddingService,
+                                  UserProfileService userProfileService,
+                                  TmdbService tmdbService) {
+            this.movieRepository    = movieRepository;
+            this.embeddingService   = embeddingService;
+            this.userProfileService = userProfileService;
+            this.tmdbService        = tmdbService;
+        }
+     * These should be the attributes of what we have 🔼
+     */
     @PostMapping
     public ResponseEntity<List<Map<String, Object>>> getRecommendations(
             @AuthenticationPrincipal FilmojiUserPrincipal principal,

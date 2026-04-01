@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { featuredMovies } from '../data/movies'
-import { useMoviesWithPosters } from '../hooks/useMoviesWithPosters'
+import { useMoviesWithPosters } from '../hooks/useMoviesAPIs'
 import { ContainerScroll } from '../components/ContainerScroll'
 
 function MovieDetail() {
@@ -111,7 +111,7 @@ function MovieDetail() {
       <>
       <div>
         <p>{movie.title} Ratings & Reviews:</p>
-        
+
       </div>
       </>
     </div>

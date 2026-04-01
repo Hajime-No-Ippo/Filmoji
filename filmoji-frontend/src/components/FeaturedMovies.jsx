@@ -1,5 +1,5 @@
 import { featuredMovies } from '../data/movies'
-import { useMoviesWithPosters } from '../hooks/useMoviesWithPosters'
+import { useMoviesWithPosters } from '../hooks/useMoviesAPIs'
 import CardSwap, { Card } from './CardSwap/CardSwap'
 import MovieCard from './MovieCard'
 

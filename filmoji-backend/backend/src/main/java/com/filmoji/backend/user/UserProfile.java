@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
+@Entity /* Movie represents one row in the movies table */
 @Table(name = "user_profiles")
 public class UserProfile {
 

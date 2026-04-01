@@ -1,6 +1,6 @@
 import { useSearchParams, Link } from 'react-router-dom'
 import { featuredMovies } from '../data/movies'
-import { useMoviesWithPosters } from '../hooks/useMoviesWithPosters'
+import { useMoviesWithPosters } from '../hooks/useMoviesAPIs'
 import MovieCard from '../components/MovieCard'
 
 const moodLabels = {

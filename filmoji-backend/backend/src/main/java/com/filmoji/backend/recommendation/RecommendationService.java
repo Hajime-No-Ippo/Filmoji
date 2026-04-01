@@ -99,6 +99,30 @@ public class RecommendationService {
         this.tmdbService        = tmdbService;
     }
 
+    /**
+     * This is actually how recommend works:
+     * 
+     * @param user 
+     * @param emojiString : Emoji Input
+     * @param limit : Now has been hard-coded as 3 in HTTP layer, could be changed in Controller layer
+     * ```java
+     *  List<RecommendationService.RecommendationResult> results =
+                recommendationService.recommend(user, emojis, 3);
+        ```
+     * @return  A recommendation List, which will add movie object and Recommend reasons under:
+        ```java
+         private String buildWhyRecommended(Movie movie, String emojiString, String primaryEmotion) {
+            String genres = movie.getGenres();
+            String genreText = (genres != null && !genres.isEmpty())
+                    ? genres.split(",")[0].trim().toLowerCase() : "this";
+            return String.format("We picked this because you're feeling %s and it's a great %s pick %s",
+                    primaryEmotion, genreText, emojiString.substring(0, Math.min(3, emojiString.length())));
+        
+         }
+        ```
+        "We picked this because you're feeling __ and it's a great __ pick __" -> Fill with the params up there
+
+     */
     public List<RecommendationResult> recommend(User user, String emojiString, int limit) {
         String emotionText = emojiToEmotionText(emojiString);
         log.info("Emotion text for '{}': {}", emojiString, emotionText);

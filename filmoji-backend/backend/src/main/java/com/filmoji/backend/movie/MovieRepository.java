@@ -32,6 +32,10 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("limit") int limit
     );
 
+    /**
+     * Check whether the Movie are 
+     * @return
+     */
     @Query("SELECT m FROM Movie m WHERE m.movieVector IS NULL")
     List<Movie> findMoviesWithoutVector();
 
