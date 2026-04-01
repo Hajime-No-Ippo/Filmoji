@@ -44,13 +44,14 @@ async function fetchWithCache(title) {
 export function useMoviesWithPosters(localMovies) {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
+  
 
   useEffect(() => {
     if (!localMovies?.length) {
       setLoading(false)
       return
     }
-
+    
     const fetchMovies = async () => {
       try {
         const results = await Promise.all(
@@ -79,4 +80,30 @@ export function useMoviesWithPosters(localMovies) {
   }, [localMovies])
 
   return { movies, loading }
+}
+
+export function useMoviesTrailer(id) {
+  const [trailerKey, setTrailerKey] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!id) {
+      setTrailerKey(null)
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+
+    fetch(`/api/movies/${id}/trailer`)
+      .then((res) => res.json())
+      .then((data) => setTrailerKey(data.trailerKey ?? null))
+      .catch((err) => {
+        console.error('Trailer fetch failed:', err)
+        setTrailerKey(null)
+      })
+      .finally(() => setLoading(false))
+  }, [id])
+
+  return { trailerKey, loading }
 }
