@@ -218,7 +218,8 @@ public class RecommendationService {
     }
 
     private Movie enrichIfNeeded(Movie movie) {
-        if (movie.getPosterUrl() == null || movie.getTrailerKey() == null) {
+        if (movie.getPosterUrl() == null || movie.getPosterUrl().isBlank() ||
+            movie.getTrailerKey() == null || movie.getTrailerKey().isBlank()) {
             try {
                 return tmdbService.enrichMovieFromTmdb(movie);
             } catch (Exception e) {

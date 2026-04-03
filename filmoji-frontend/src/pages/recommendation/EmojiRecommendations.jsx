@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import MovieCard from '../components/MovieCard'
-import RecommendationGenreStep from '../components/RecommendationGenreStep'
+import MovieCard from '../../components/movie/MovieCard'
+import RecommendationGenreStep from '../../components/recommendation/RecommendationGenreStep'
+import { authFetch } from '../../utils/api'
 
 // ── Step 1: Categories ────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -160,6 +161,7 @@ function Step3({ likedVibes }) {
   const [movies, setMovies]     = useState([])
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState(null)
+  // const [input, setInput]       = useState('')
 
   const pick = (emoji) => {
     setSelected(emoji)
@@ -167,7 +169,7 @@ function Step3({ likedVibes }) {
     setError(null)
     setLoading(true)
 
-    fetch('/api/recommendations', {
+    authFetch('/api/recommendations', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ emojis: emoji }),
@@ -180,6 +182,19 @@ function Step3({ likedVibes }) {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }
+
+  // const type = (emoji) => {
+  //   setInput(emoji)
+  //   setMovies([])
+  //   setError(null)
+  //   setLoading(true)
+
+  //   fetch('/api/recommendations', {
+  //     method: 'GET',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body:    JSON.stringify({ emoji: emoji }),
+  //   })
+  // }
 
   return (
     <div>

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { featuredMovies } from '../data/movies'
-import { useMoviesWithPosters, useMoviesTrailer } from '../hooks/useMoviesAPIs'
-import { ContainerScroll } from '../components/ContainerScroll'
-import ReviewsColumn from '../components/ReviewsColumn/ReviewsColumn'
-import { db } from '../../firebase'
+import { featuredMovies } from '../../data/movies'
+import { useMoviesWithPosters, useMoviesTrailer } from '../../hooks/useMoviesAPIs'
+import { ContainerScroll } from '../../components/effects/ContainerScroll/ContainerScroll'
+import ReviewsColumn from '../../components/effects/ReviewsColumn/ReviewsColumn'
+import { db } from '../../../firebase'
 import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
+import FeaturedMovies from '../../components/movie/FeaturedMovies'
 
 function MovieDetail() {
   const { id } = useParams()
@@ -127,25 +128,6 @@ function MovieDetail() {
       {/* UpComing functions, we will render reviews and rating details below the pad, also do the options */}
 
       <div className="pt-24 pb-20 px-6 min-h-screen">
-        
-
-          {/* Links overlay at bottom */}
-          {/* <div className="w-full relative">
-            <Link
-              to="/reviews"
-              className="flex-1 text-center py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors no-underline"
-            >
-              Read Reviews
-            </Link>
-            <Link
-              to="/"
-              className="flex-1 text-center py-2 rounded-lg border border-white/20 hover:bg-white/10 text-white text-sm transition-colors no-underline"
-            >
-              More Movies
-            </Link> 
-          </div> */}
-          
-
           {/* Rating and Reviews Sections */}
           <section id="reviews" className="section">
             <h3 className="text-3xl font-bold mb-6">{movie.title} Ratings & Reviews</h3>
@@ -203,6 +185,7 @@ function MovieDetail() {
             )}
           </section>
         </div>
+        <FeaturedMovies/>
     </div>
   )
 }

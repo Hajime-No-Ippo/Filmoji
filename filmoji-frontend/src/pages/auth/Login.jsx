@@ -1,39 +1,31 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase";
-import  Particles  from "../components/effects/Particles/Particles" 
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../../firebase";
+import Particles from "../../components/effects/Particles/Particles"
 
-function Register() {
-  const [name, setName] = useState('')
+function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
-  const [accepted, setAccepted] = useState(false)
+  const [remember, setRemember] = useState(false)
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (password !== confirm) {
-      alert("Passwords do not match.");
-      return;
-    }
-
+    e.preventDefault()
+    console.log('Login:', { email, password, remember })
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard"); // auto login after registration
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/"); // or navigate("/dashboard") to go to home page
     } catch (error) {
       alert(error.message);
     }
-    console.log('Register:', { name, email, password, confirm, accepted })
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-20">
       <div className="w-full max-w-5xl rounded-2xl overflow-hidden shadow-2xl shadow-black/50 flex flex-col md:flex-row">
 
-        {/* Mobile compact header panel
+        {/* Mobile compact header
         <div className="md:hidden bg-gradient-to-br from-panel via-panel/80 to-panel-end px-8 py-6">
           <Link to="/" className="nav-link inline-block mb-3">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,13 +33,13 @@ function Register() {
             </svg>
           </Link>
           <p className="text-ink/80 text-xs tracking-widest uppercase mb-1">Filmoji</p>
-          <h2 className="text-ink text-xl font-bold">Nice to meet you :)</h2>
+          <h2 className="text-ink text-xl font-bold">Welcome back</h2>
         </div> */}
 
         {/* Left decorative panel (desktop only) */}
-        <div className="relative hidden md:flex md:w-5/12 bg-gradient-to-br from-panel via-panel/80 to-panel-end p-10 flex-col justify-between overflow-hidden min-h-[600px]">
+        <div className="relative hidden md:flex md:w-5/12 bg-gradient-to-br from-panel via-panel/80 to-panel-end p-10 flex-col justify-between overflow-hidden min-h-[550px]">
           {/* Background video */}
-          <div style={{ width: '100%', height: '600px', position: 'relative' }}>
+         <div style={{ width: '100%', height: '600px', position: 'relative' }}>
             <Particles
               particleColors={["#ffffff"]}
               particleCount={200}
@@ -74,8 +66,8 @@ function Register() {
           {/* Branding */}
           <div className="relative z-10">
             <p className="text-white/80 text-xs tracking-widest uppercase mb-4">Filmoji</p>
-            <h2 className="text-white text-3xl font-bold mb-2">Nice to meet you :)</h2>
-            <p className="text-white/70 text-sm font-[Inter]">Just register to join with us</p>
+            <h2 className="text-white text-3xl font-bold mb-2">Welcome back</h2>
+            <p className="text-white/70 text-sm font-[Inter]">Please login to continue</p>
           </div>
         </div>
 
@@ -83,9 +75,9 @@ function Register() {
         <div className="md:w-7/12 bg-card p-8 md:p-12 flex flex-col justify-center">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-8">
-            <h1 className="text-2xl font-bold text-ink">Register</h1>
-            <Link to="/login" className="accent-link flex items-center gap-1 font-[Inter] text-sm">
-              <span>&rarr;</span> Already have account?
+            <h1 className="text-2xl font-bold text-ink">Login</h1>
+            <Link to="/register" className="accent-link flex items-center gap-1 font-[Inter] text-sm">
+              <span>&rarr;</span> Create new account
             </Link>
           </div>
 
@@ -108,19 +100,12 @@ function Register() {
           {/* Divider */}
           <div className="flex items-center gap-4 mb-6">
             <div className="divider"></div>
-            <span className="divider-text">Or register with email</span>
+            <span className="divider-text">Or login with email</span>
             <div className="divider"></div>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Name"
-              className="input-field"
-            />
             <input
               type="email"
               value={email}
@@ -128,44 +113,37 @@ function Register() {
               placeholder="Email"
               className="input-field"
             />
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="input-field flex-1"
-              />
-              <input
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Repeat Password"
-                className="input-field flex-1"
-              />
-            </div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="input-field"
+            />
 
-            {/* Terms + Submit */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-              <label className="flex items-start gap-2 cursor-pointer">
+            {/* Remember + Forgot */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={accepted}
-                  onChange={(e) => setAccepted(e.target.checked)}
-                  className="w-4 h-4 mt-0.5 rounded accent-accent shrink-0"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="w-4 h-4 rounded accent-accent"
                 />
-                <span className="text-ink/60 text-xs leading-relaxed font-[Inter]">
-                  I have read and accept the{' '}
-                  <a href="#" className="accent-link">Terms of Service & Privacy Policy</a> *
-                </span>
+                <span className="text-ink/70 text-sm font-[Inter]">Remember</span>
               </label>
-              <button
-                type="submit"
-                className="btn-primary w-full sm:w-auto sm:px-8 shrink-0"
-              >
-                Continue
-              </button>
+              {/* <a href="#" className="accent-link font-[Inter]">Forgot password?</a> */}
+              <Link to="/forget" className="accent-link font-[Inter]">
+                Forgot password?
+              </Link>
             </div>
+
+            <button
+              type="submit"
+              className="btn-primary w-full"
+            >
+              Continue
+            </button>
           </form>
         </div>
       </div>
@@ -173,4 +151,4 @@ function Register() {
   )
 }
 
-export default Register
+export default Login

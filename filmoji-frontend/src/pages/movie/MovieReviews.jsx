@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { db } from "../../firebase";
+import { db } from "../../../firebase";
 import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
-import { featuredMovies } from "../data/movies";
-import { ReviewsWall } from "../components/effects/ReviewsColumn/ReviewsColumn";
+import { featuredMovies } from "../../data/movies";
+import { ReviewsWall } from "../../components/effects/ReviewsColumn/ReviewsColumn";
 
 function MovieReviews() {
   const [searchParams] = useSearchParams()

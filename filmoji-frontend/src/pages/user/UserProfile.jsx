@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { auth, db } from "../../firebase";
+import { auth, db } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   collection,
@@ -13,7 +13,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { featuredMovies } from "../data/movies";
+import { featuredMovies } from "../../data/movies";
 
 function UserProfile() {
   const [user, setUser] = useState(null);

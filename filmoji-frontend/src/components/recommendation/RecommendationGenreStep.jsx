@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import BubbleMenu from './BubbleMenu/BubbleMenu'
+import BubbleMenu from '../effects/BubbleMenu/BubbleMenu'
+import Particles from '../effects/Particles/Particles'
 
 const MENU_ITEMS = [
   {
@@ -67,6 +68,19 @@ function RecommendationGenreStep({ onNext }) {
           </p>
         </div>
 
+        {/* Particles as full section background */}
+        <Particles
+          particleColors={["#F5C519"]}
+          particleCount={200}
+          particleSpread={10}
+          speed={0.1}
+          particleBaseSize={100}
+          moveParticlesOnHover
+          alphaParticles={false}
+          disableRotation={false}
+          pixelRatio={1}
+          className="absolute inset-0 w-full h-full"
+        />
         <BubbleMenu
           className="recommendation-bubble-menu"
           logo={<span className="text-sm font-semibold tracking-[0.25em] text-[#1C1600]">GENRES</span>}

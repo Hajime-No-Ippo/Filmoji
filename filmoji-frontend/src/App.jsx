@@ -2,22 +2,22 @@ import { Routes, Route } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import { ToastProvider } from "./components/ToastContext";
+import { ToastProvider } from "./components/toast/ToastContext";
 import Home from "./pages/Home";
-import Categories from "./pages/Categories";
-import CategoryDetail from "./pages/CategoryDetail";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import Dashboard from "./pages/Dashboard";
-import UserProfile from "./pages/UserProfile";
-import MovieReviews from "./pages/MovieReviews";
-import MovieDetail from "./pages/MovieDetail";
-import Recommendations from "./pages/Recommendations";
-import EmojiRecommendations from "./pages/EmojiRecommendations";
-import PersonalPreference from "./pages/PersonalPreference";
-import ProtectedRoute from "./components/ProtectedRoute";
-import ScrollToTop from "./components/ScrollToTop";
+import Categories from "./pages/movie/Categories";
+import CategoryDetail from "./pages/movie/CategoryDetail";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import Dashboard from "./pages/user/Dashboard";
+import UserProfile from "./pages/user/UserProfile";
+import MovieReviews from "./pages/movie/MovieReviews";
+import MovieDetail from "./pages/movie/MovieDetail";
+import Recommendations from "./pages/recommendation/Recommendations";
+import EmojiRecommendations from "./pages/recommendation/EmojiRecommendations";
+import PersonalPreference from "./pages/user/PersonalPreference";
+import ProtectedRoute from "./components/functional/ProtectedRoute";
+import ScrollToTop from "./components/functional/ScrollToTop";
 
 function App() {
   return (
