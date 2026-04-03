@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
-import  Particles  from "../../components/Particles/Particles" 
+import Particles from "../../components/effects/Particles/Particles" 
 
 function Register() {
   const [name, setName] = useState('')

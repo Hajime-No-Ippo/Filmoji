@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import { ToastProvider } from "./components/ToastContext";
+import { ToastProvider } from "./components/toast/ToastContext";
 import Home from "./pages/Home";
 import Categories from "./pages/movie/Categories";
 import CategoryDetail from "./pages/movie/CategoryDetail";
@@ -16,8 +16,8 @@ import MovieDetail from "./pages/movie/MovieDetail";
 import Recommendations from "./pages/recommendation/Recommendations";
 import EmojiRecommendations from "./pages/recommendation/EmojiRecommendations";
 import PersonalPreference from "./pages/user/PersonalPreference";
-import ProtectedRoute from "./components/ProtectedRoute";
-import ScrollToTop from "./components/ScrollToTop";
+import ProtectedRoute from "./components/functional/ProtectedRoute";
+import ScrollToTop from "./components/functional/ScrollToTop";
 
 function App() {
   return (
