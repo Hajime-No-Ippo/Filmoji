@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { featuredMovies } from "../data/movies";
-import { categories } from "../data/categories";
+import { featuredMovies } from "../../data/movies";
+import { categories } from "../../data/categories";
 
 function CategoryDetail() {
   const { name } = useParams();

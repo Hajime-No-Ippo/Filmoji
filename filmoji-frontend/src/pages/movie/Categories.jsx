@@ -1,5 +1,5 @@
-import { categories } from '../data/categories'
-import CategoryCard from '../components/CategoryCard'
+import { categories } from '../../data/categories'
+import CategoryCard from '../../components/CategoryCard'
 
 function Categories() {
   return (

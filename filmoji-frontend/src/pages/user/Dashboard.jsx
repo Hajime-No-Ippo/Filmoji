@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../firebase";
+import { auth } from "../../../firebase";
 import { useNavigate } from "react-router-dom";
-import MoodInput from "../components/MoodInput";
+import MoodInput from "../../components/MoodInput";
 
 const Dashboard = () => {
   const navigate = useNavigate();

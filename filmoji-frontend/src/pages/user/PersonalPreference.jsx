@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { auth, db } from "../../firebase";
+import { auth, db } from "../../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { categories } from "../data/categories";
+import { categories } from "../../data/categories";
 
 const preferenceOptions = [
   { id: "love", text: "Absolutely loved it", color: "#27AE60" },

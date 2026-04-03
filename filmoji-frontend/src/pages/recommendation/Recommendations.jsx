@@ -1,7 +1,7 @@
 import { useSearchParams, Link } from 'react-router-dom'
-import { featuredMovies } from '../data/movies'
-import { useMoviesWithPosters } from '../hooks/useMoviesAPIs'
-import MovieCard from '../components/movie/MovieCard'
+import { featuredMovies } from '../../data/movies'
+import { useMoviesWithPosters } from '../../hooks/useMoviesAPIs'
+import MovieCard from '../../components/MovieCard'
 
 const moodLabels = {
   happy:       '😊 Happy',

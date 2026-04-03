@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { featuredMovies } from '../data/movies'
-import { useMoviesTrailer } from '../hooks/useMoviesAPIs'
+import { featuredMovies } from '../../data/movies'
+import { useMoviesTrailer } from '../../hooks/useMoviesAPIs'
 
 // ── Fan geometry ─────────────────────────────────────────────────────────────
 const CX = 100, CY = 400, R1 = 128, R2 = 318

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useScroll, useTransform, motion, AnimatePresence } from 'motion/react'
 import { Link } from 'react-router-dom'
-import WaveDivider from './WaveDivider'
+import WaveDivider from './effects/WaveDivider/WaveDivider'
+import { authFetch } from '../utils/api'
 
 // 16 basic emotion emojis split into 4 columns
 
@@ -92,22 +93,22 @@ const columns = [
 ]
 
 const moodLabels = {
-  happy:       '😊 Happy',
-  angry:       '😡 Angry',
-  cool:        '😎 Cool',
-  festive:     '🥳 Festive',
-  sad:         '😢 Sad',
-  romantic:    '😍 Romantic',
-  excited:     '🤩 Excited',
-  bored:       '🥱 Bored',
-  scared:      '😱 Scared',
-  emotional:   '🥺 Emotional',
-  mindblown:   '🤯 Mind-blown',
-  peaceful:    '😌 Peaceful',
-  laughing:    '😂 Laughing',
-  thoughtful:  '🤔 Thoughtful',
-  tense:       '😤 Tense',
-  overwhelmed: '🫠 Overwhelmed',
+  happy:       'Happy',
+  angry:       'Angry',
+  cool:        'Cool',
+  festive:     'Festive',
+  sad:         'Sad',
+  romantic:    'Romantic',
+  excited:     'Excited',
+  bored:       'Bored',
+  scared:      'Scared',
+  emotional:   'Emotional',
+  mindblown:   'Mind-blown',
+  peaceful:    'Peaceful',
+  laughing:    'Laughing',
+  thoughtful:  'Thoughtful',
+  tense:       'Tense',
+  overwhelmed: 'Overwhelmed',
 }
 
 function Hero() {
@@ -130,9 +131,13 @@ function Hero() {
     setExpanded({ ...block, rect })
     setSelectedMovie(null)
     setRecLoading(true)
-    fetch(`/api/recommendations?emojis=${encodeURIComponent(block.emoji)}&limit=1`)
+    authFetch('/api/recommendations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emojis: block.emoji })
+    })
       .then((res) => res.json())
-      .then((data) => setSelectedMovie(data[0]?.movie ?? null))
+      .then((data) => setSelectedMovie(data[0] ?? null))
       .catch(() => setSelectedMovie(null))
       .finally(() => setRecLoading(false))
   }
@@ -172,13 +177,12 @@ function Hero() {
                 key={block.mood}
                 layoutId={`emoji-block-${block.mood}`}
                 onClick={(e) => handleClick(e, block)}
-                // Reuse this radius as main theme
                 style={{ backgroundColor: block.color, borderRadius: '1.5rem' }}
-                className="flex items-center justify-center h-52 w-full cursor-pointer border-none shrink-0 hover:brightness-110 hover:scale-[1.03] transition-all duration-200 group"
+                className="flex items-center justify-center h-28 sm:h-40 md:h-52 w-full cursor-pointer border-none shrink-0 hover:brightness-110 hover:scale-[1.03] transition-all duration-200 group"
               >
                 <motion.span
                   layoutId={`emoji-${block.mood}`}
-                  className="text-7xl group-hover:scale-110 transition-transform duration-200 leading-none select-none"
+                  className="text-3xl sm:text-5xl md:text-7xl group-hover:scale-110 transition-transform duration-200 leading-none select-none"
                 >
                   {block.emoji}
                 </motion.span>
@@ -210,7 +214,7 @@ function Hero() {
               exit={{ borderRadius: '1.5rem', opacity: 0 }}
               transition={{ type: 'spring', stiffness: 280, damping: 30 }}
               style={{ backgroundColor: expanded.color }}
-              className="fixed inset-0 z-[100] flex overflow-hidden"
+              className="fixed inset-0 z-[100] flex flex-col md:flex-row overflow-hidden overflow-y-auto"
             >
               {/* Subtle radial glow behind emoji */}
               <div
@@ -229,11 +233,11 @@ function Hero() {
               </button>
 
               {/* ── Left panel: emoji + mood identity ── */}
-              <div className="flex flex-col items-center justify-center w-[42%] px-12 gap-5">
+              <div className="flex flex-col items-center justify-center w-full md:w-[42%] px-8 md:px-12 pt-16 pb-6 md:py-0 gap-4 md:gap-5">
                 <motion.span
                   layoutId={`emoji-${expanded.mood}`}
                   className="leading-none select-none"
-                  style={{ fontSize: 'clamp(6rem, 14vw, 13rem)' }}
+                  style={{ fontSize: 'clamp(4rem, 20vw, 13rem)' }}
                 >
                   {expanded.emoji}
                 </motion.span>
@@ -262,12 +266,12 @@ function Hero() {
                 animate={{ scaleY: 1, opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ delay: 0.1, duration: 0.4 }}
-                className="w-px self-stretch my-16 origin-center"
+                className="hidden md:block w-px self-stretch my-16 origin-center"
                 style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
               />
 
               {/* ── Right: film detail panel ── */}
-              <div className="flex flex-col justify-center py-14 px-10 flex-1 max-w-xl">
+              <div className="flex flex-col justify-start md:justify-center py-6 md:py-14 px-6 md:px-10 flex-1 md:max-w-3xl">
 
                 {recLoading ? (
                   <p className="text-white/40 text-sm mb-8">Finding a movie for your mood...</p>
@@ -276,25 +280,25 @@ function Hero() {
                     <h2 className="text-2xl font-bold text-white mb-2">{selectedMovie.title}</h2>
                     <div className="flex items-center gap-3 mb-4">
                       <span className="text-xs text-white/40">{selectedMovie.releaseYear}</span>
-                      <span className="text-xs font-semibold text-yellow-500">★ {selectedMovie.rating?.toFixed(1)}</span>
-                      {selectedMovie.genres?.split(',').map((g) => (
+                      <span className="text-xs font-[Inter] text-yellow-500">★ {selectedMovie.rating?.toFixed(1)}</span>
+                      {(Array.isArray(selectedMovie.genres) ? selectedMovie.genres : selectedMovie.genres?.split(',') ?? []).map((g) => (
                         <span key={g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-white/50">
                           {g.trim()}
                         </span>
                       ))}
                     </div>
-                    <p className="text-white/60 text-sm leading-relaxed mb-8">
+                    <p className="text-white/60 text-sm leading-relaxed mb-8 font-[Inter]">
                       {selectedMovie.synopsis || 'An unforgettable film that perfectly reflects your mood right now.'}
                     </p>
                   </>
                 ) : (
-                  <p className="text-white/40 text-sm mb-8">No recommendation found. Try another mood!</p>
+                  <p className="text-white/40 text-sm mb-8 font-[Inter]">No recommendation found. Try another mood!</p>
                 )}
 
                 <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white mb-2">
                   Reason we suggest
                 </h3>
-                <p className="text-white/60 text-sm leading-relaxed mb-8">
+                <p className="text-white/60 text-sm leading-relaxed mb-8 font-[Inter]">
                   Based on your{' '}
                   <span className="font-semibold text-white/80">{expanded.mood}</span> mood, this film's
                   tone, pacing, and emotional arc are a natural match for how you're feeling.
@@ -303,7 +307,7 @@ function Hero() {
                 {/* Trailer placeholder */}
                 <div
                   className="rounded-2xl flex items-center justify-center mb-8 cursor-pointer hover:brightness-[0.97] transition-all"
-                  style={{ backgroundColor: '#e9eaec', height: 372 }}
+                  style={{ backgroundColor: '#e9eaec', height: 'clamp(200px, 40vw, 372px)' }}
                 >
                   {trailerLoading ? (
                     <div className="w-full h-full flex items-center justify-center text-white/40 text-sm">

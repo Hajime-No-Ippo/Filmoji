@@ -1,8 +1,8 @@
-import { featuredMovies } from '../data/movies'
-import { useMoviesWithPosters } from '../hooks/useMoviesAPIs'
-import CardSwap, { Card } from './CardSwap/CardSwap'
+import { featuredMovies } from '../../data/movies'
+import { useMoviesWithPosters } from '../../hooks/useMoviesAPIs'
+import CardSwap, { Card } from '../effects/CardSwap/CardSwap'
 import MovieCard from './MovieCard'
-import Particles from './Particles/Particles'
+import Particles from '../effects/Particles/Particles'
 
 function FeaturedMovies() {
   const { movies, loading } = useMoviesWithPosters(featuredMovies)

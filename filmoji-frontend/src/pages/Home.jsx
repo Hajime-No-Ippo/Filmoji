@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import Hero from '../components/Hero'
-import FeaturedMovies from '../components/FeaturedMovies'
-import CategoriesSection from '../components/CategoriesSection'
+import FeaturedMovies from '../components/movie/FeaturedMovies'
+import CategoriesSection from '../components/category/CategoriesSection'
 
 function Home() {
   useEffect(() => {
