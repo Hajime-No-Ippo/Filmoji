@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { featuredMovies } from '../../data/movies'
-import { useMoviesWithPosters, useMoviesTrailer } from '../../hooks/useMoviesAPIs'
+import { useMoviesTrailer } from '../../hooks/useMoviesAPIs'
 import { ContainerScroll } from '../../components/effects/ContainerScroll/ContainerScroll'
 import ReviewsColumn from '../../components/effects/ReviewsColumn/ReviewsColumn'
 import { db } from '../../../firebase'
@@ -11,12 +10,19 @@ import FeaturedMovies from '../../components/movie/FeaturedMovies'
 
 function MovieDetail() {
   const { id } = useParams()
-  const { movies, loading } = useMoviesWithPosters(featuredMovies)
-  const movie = loading
-    ? featuredMovies.find((m) => m.id === parseInt(id))
-    : movies.find((m) => m.id === parseInt(id))
-  const { trailerKey: fetchedTrailerKey, loading: trailerLoading } = useMoviesTrailer(movie?.id)
-  const trailerKey = fetchedTrailerKey ?? 'dQw4w9WgXcQ' // TODO: remove fallback once backend returns trailerKey
+  const [movie, setMovie] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`/api/movies/${id}`)
+      .then((res) => res.json())
+      .then((data) => setMovie(data))
+      .catch(() => setMovie(null))
+      .finally(() => setLoading(false))
+  }, [id])
+
+  const { trailerKey: fetchedTrailerKey, loading: trailerLoading } = useMoviesTrailer(movie?.tmdbId)
+  const trailerKey = fetchedTrailerKey ?? null
   const navigate = useNavigate()
 
   const [reviews, setReviews] = useState([])
@@ -78,7 +84,7 @@ function MovieDetail() {
         ← Back
       </Link>
       <div className="flex flex-wrap justify-center gap-2 mb-4">
-        {movie.genres.map((g) => (
+        {(Array.isArray(movie.genres) ? movie.genres : movie.genres?.split(',') ?? []).map((g) => (
           <span key={g} className="text-xs px-3 py-1 rounded-full border border-accent text-accent uppercase tracking-widest">
             {g}
           </span>
@@ -174,7 +180,17 @@ function MovieDetail() {
               <p className="text-muted text-sm">No reviews yet. Be the first!</p>
             ) : (
               <div>
-                <ReviewsColumn reviews={reviews} duration={20} className="max-h-[520px]" />
+                <div className="relative">
+                  <ReviewsColumn reviews={reviews} duration={20} className="max-h-[520px]" />
+                  {/* fade in top */}
+                  <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
+                    style={{ background: 'linear-gradient(to bottom, var(--color-dark) 0%, transparent 100%)' }}
+                  />
+                  {/* fade out bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+                    style={{ background: 'linear-gradient(to bottom, transparent 0%, var(--color-dark) 100%)' }}
+                  />
+                </div>
                 <button
                   onClick={() => navigate(`/reviews?movieId=${movie.id}`)}
                   className="text-sm text-accent hover:text-accent-hover text-left mt-4 block"

@@ -54,7 +54,7 @@ body {
   }
 
   .container-main {
-    @apply max-w-7xl mx-auto;
+    @apply max-w-screen-2xl mx-auto;
   }
 
   /* --- Typography --- */
@@ -122,7 +122,7 @@ body {
   }
 
   .grid-movies {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6;
   }
 }
 

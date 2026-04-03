@@ -1,6 +1,5 @@
+import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { featuredMovies } from '../../data/movies'
-import { useMoviesWithPosters } from '../../hooks/useMoviesAPIs'
 import MovieCard from '../../components/movie/MovieCard'
 
 const moodLabels = {
@@ -26,7 +25,23 @@ function Recommendations() {
   const [searchParams] = useSearchParams()
   const mood = searchParams.get('mood') || ''
   const label = moodLabels[mood] || mood
-  const { movies, loading } = useMoviesWithPosters(featuredMovies)
+  const [movies, setMovies] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/movies')
+      .then((res) => res.json())
+      .then((data) => setMovies(data.map((m) => ({
+        id:     m.id,
+        title:  m.title,
+        poster: m.posterUrl || '',
+        year:   m.releaseYear,
+        rating: m.rating,
+        genres: Array.isArray(m.genres) ? m.genres : (m.genres?.split(',') ?? []),
+      }))))
+      .catch(() => setMovies([]))
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-6">
@@ -41,7 +56,7 @@ function Recommendations() {
         </p>
 
         {loading ? (
-          <div>Updating movie posters...</div>
+          <div className="text-muted">Loading movies...</div>
         ) : (
           <div className="grid-movies">
             {movies.map((movie) => (

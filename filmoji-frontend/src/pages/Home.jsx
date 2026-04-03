@@ -1,18 +1,13 @@
-import { useEffect } from 'react'
 import Hero from '../components/Hero'
 import FeaturedMovies from '../components/movie/FeaturedMovies'
 import CategoriesSection from '../components/category/CategoriesSection'
+import DescriptionBrick from '../components/movie/DescriptionBrick'
 
 function Home() {
-  useEffect(() => {
-    fetch('http://localhost:8080/api/debug')
-      .then(res => res.json())
-      .then(data => console.log('Debug response from backend:', data))
-  }, [])
-
   return (
     <>
       <Hero />
+      <DescriptionBrick />
       <FeaturedMovies />
       <CategoriesSection />
     </>

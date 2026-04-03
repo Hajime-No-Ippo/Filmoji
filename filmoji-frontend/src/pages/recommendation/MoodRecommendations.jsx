@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { featuredMovies } from '../../data/movies'
+import { useState, useEffect } from 'react'
 import { useMoviesTrailer } from '../../hooks/useMoviesAPIs'
 
 // ── Fan geometry ─────────────────────────────────────────────────────────────
@@ -37,14 +36,21 @@ function sliceCenter(a1, a2) {
 }
 
 // ── Props: emoji, color, mood (strings) ──────────────────────────────────────
-export default function MoodRecommendations({ emoji = '😊', color = '#F5C519', mood = 'happy' }) {
-  const movies = featuredMovies.slice(0, 5)
+export default function MoodRecommendations({ emoji = '😊', color = '#F5C519', mood = 'happy', movies: propMovies }) {
+  const [movies, setMovies] = useState(propMovies ?? [])
   const [selectedIdx, setSelectedIdx] = useState(0)
-  const selected = movies[selectedIdx]
-  const { trailerKey, loading: trailerLoading } = useMoviesTrailer(selected.id)
 
-  // TODO: remove this test line once backend is ready   
-  const testTrailerKey = 'dQw4w9WgXcQ'
+  useEffect(() => {
+    if (!propMovies) {
+      fetch('/api/movies')
+        .then((res) => res.json())
+        .then((data) => setMovies(data.slice(0, 5)))
+        .catch(() => {})
+    }
+  }, [propMovies])
+
+  const selected = movies[selectedIdx]
+  const { trailerKey, loading: trailerLoading } = useMoviesTrailer(selected?.tmdbId)
 
   return (
     <div className="min-h-screen bg-white flex items-stretch">
@@ -114,7 +120,7 @@ export default function MoodRecommendations({ emoji = '😊', color = '#F5C519',
         <div className="flex items-center gap-3 mb-4">
           <span className="text-xs text-ink/40">{selected.year}</span>
           <span className="text-xs font-semibold text-yellow-500">★ {selected.rating}</span>
-          {selected.genres.map((g) => (
+          {(Array.isArray(selected.genres) ? selected.genres : selected.genres?.split(',') ?? []).map((g) => (
             <span key={g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-ink/50">
               {g}
             </span>
@@ -143,7 +149,7 @@ export default function MoodRecommendations({ emoji = '😊', color = '#F5C519',
             </div>
           ) : trailerKey ? (
             <iframe
-              src={`https://www.youtube.com/embed/${testTrailerKey}`}
+              src={`https://www.youtube.com/embed/${trailerKey}`}
               // title={`${selected.title} trailer`}
               allowFullScreen
               className="w-full h-full"

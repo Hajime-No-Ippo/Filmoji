@@ -82,12 +82,12 @@ export function useMoviesWithPosters(localMovies) {
   return { movies, loading }
 }
 
-export function useMoviesTrailer(id) {
+export function useMoviesTrailer(tmdbId) {
   const [trailerKey, setTrailerKey] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!id) {
+    if (!tmdbId) {
       setTrailerKey(null)
       setLoading(false)
       return
@@ -95,7 +95,7 @@ export function useMoviesTrailer(id) {
 
     setLoading(true)
 
-    fetch(`/api/movies/${id}/trailer`)
+    fetch(`/api/movies/tmdb/${tmdbId}/trailer`)
       .then((res) => res.json())
       .then((data) => setTrailerKey(data.trailerKey ?? null))
       .catch((err) => {
@@ -103,7 +103,7 @@ export function useMoviesTrailer(id) {
         setTrailerKey(null)
       })
       .finally(() => setLoading(false))
-  }, [id])
+  }, [tmdbId])
 
   return { trailerKey, loading }
 }

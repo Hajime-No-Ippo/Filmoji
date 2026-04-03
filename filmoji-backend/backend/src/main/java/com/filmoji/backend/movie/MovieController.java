@@ -46,6 +46,13 @@ public class MovieController {
         return movies.findAll();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Movie> getById(@PathVariable Integer id) {
+        return movies.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     // DELETE /api/movies/{id} — remove a movie from the database
     /**
      * 
@@ -94,6 +101,19 @@ public class MovieController {
     @GetMapping("/{id}/trailer")
     public ResponseEntity<Map<String, Object>> getTrailerKey(@PathVariable Integer id) {
         return movies.findById(id)
+                .map(movie -> {
+                    Map<String, Object> response = new LinkedHashMap<>();
+                    response.put("id", movie.getId());
+                    response.put("tmdbId", movie.getTmdbId());
+                    response.put("trailerKey", movie.getTrailerKey());
+                    return ResponseEntity.ok(response);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/tmdb/{tmdbId}/trailer")
+    public ResponseEntity<Map<String, Object>> getTrailerKeyByTmdbId(@PathVariable Integer tmdbId) {
+        return movies.findByTmdbId(tmdbId)
                 .map(movie -> {
                     Map<String, Object> response = new LinkedHashMap<>();
                     response.put("id", movie.getId());

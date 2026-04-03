@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { db } from "../../../firebase";
 import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
-import { featuredMovies } from "../../data/movies";
 import { ReviewsWall } from "../../components/effects/ReviewsColumn/ReviewsColumn";
 
 function MovieReviews() {
@@ -12,17 +11,20 @@ function MovieReviews() {
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [allReviews, setAllReviews] = useState([]);
+  const [allMovies, setAllMovies] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/movies')
+      .then((res) => res.json())
+      .then((data) => setAllMovies(data))
+      .catch(() => {})
+  }, [])
 
   // Fetch all recent reviews for the wall
   useEffect(() => {
     const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(30))
     getDocs(q).then((snap) => {
-      const data = snap.docs.map((d) => {
-        const r = d.data()
-        const movie = featuredMovies.find((m) => m.id === r.movieId)
-        return { id: d.id, ...r, movieTitle: movie?.title }
-      })
-      setAllReviews(data)
+      setAllReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
     })
   }, []);
 
@@ -68,8 +70,12 @@ function MovieReviews() {
   };
 
   const selectedMovieData = selectedMovie
-    ? featuredMovies.find((m) => m.id === parseInt(selectedMovie))
+    ? allMovies.find((m) => m.id === parseInt(selectedMovie))
     : null;
+  const enrichedReviews = allReviews.map((r) => ({
+    ...r,
+    movieTitle: allMovies.find((m) => m.id === r.movieId)?.title,
+  }))
 
   return (
     <div
@@ -87,15 +93,21 @@ function MovieReviews() {
               Real reviews from Filmoji users
             </p>
           </div>
-          <ReviewsWall reviews={allReviews} className="max-h-[480px]" />
-          {/* fade out bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
-            style={{ background: 'linear-gradient(to bottom, transparent, var(--color-dark))' }}
-          />
+          <div className="relative">
+            <ReviewsWall reviews={enrichedReviews} className="max-h-[480px]" />
+            {/* fade in top */}
+            <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
+              style={{ background: 'linear-gradient(to bottom, var(--color-dark) 0%, transparent 100%)' }}
+            />
+            {/* fade out bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+              style={{ background: 'linear-gradient(to bottom, transparent 0%, var(--color-dark) 100%)' }}
+            />
+          </div>
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-4 mt-80">
         {/* Header */}
         <div className="text-center mb-12">
           <h1
@@ -138,7 +150,7 @@ function MovieReviews() {
             <option value="" disabled>
               -- Please select a movie --
             </option>
-            {featuredMovies.map((movie) => (
+            {allMovies.map((movie) => (
               <option
                 key={movie.id}
                 value={movie.id}
@@ -147,7 +159,7 @@ function MovieReviews() {
                   color: "var(--color-ink)",
                 }}
               >
-                {movie.title} ({movie.year}) - IMDb: {movie.rating}
+                {movie.title} ({movie.releaseYear}) - IMDb: {movie.rating}
               </option>
             ))}
           </select>
@@ -164,7 +176,7 @@ function MovieReviews() {
           >
             <div className="flex flex-col md:flex-row gap-6">
               <img
-                src={selectedMovieData.poster}
+                src={selectedMovieData.posterUrl}
                 alt={selectedMovieData.title}
                 className="w-full md:w-48 h-72 object-cover rounded-lg"
               />
@@ -176,8 +188,8 @@ function MovieReviews() {
                   {selectedMovieData.title}
                 </h2>
                 <p style={{ color: "var(--color-muted)" }} className="mb-4">
-                  {selectedMovieData.year} •{" "}
-                  {selectedMovieData.genres.join(", ")}
+                  {selectedMovieData.releaseYear} •{" "}
+                  {Array.isArray(selectedMovieData.genres) ? selectedMovieData.genres.join(", ") : selectedMovieData.genres}
                 </p>
                 <div className="flex items-center space-x-6">
                   <div>
