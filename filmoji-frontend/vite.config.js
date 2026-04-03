@@ -4,6 +4,11 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      ogl: '/node_modules/ogl/src/index.js',
+    },
+  },
   server: {
     proxy: {
       '/api': 'http://localhost:8080',

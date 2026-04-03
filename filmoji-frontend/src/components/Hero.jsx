@@ -1,10 +1,57 @@
 import { useState } from 'react'
 import { useScroll, useTransform, motion, AnimatePresence } from 'motion/react'
 import { Link } from 'react-router-dom'
-import { featuredMovies } from '../data/movies'
 import WaveDivider from './WaveDivider'
 
 // 16 basic emotion emojis split into 4 columns
+
+/**
+ * The intended flow should be:                               
+                  
+  1. User clicks an emoji brick (e.g. 😢 sad)                
+  2. Fetch a movie recommendation from the backend matching
+  that mood                                                  
+  3. Show it in the expanded panel with the correct
+  poster/trailer                                             
+                  
+  WorkFlow:
+  - emoji -> fetch info -> fetch trailer
+  - relations: emoji -> movies
+
+  Backend:
+  ```java
+  @PostMapping
+    public ResponseEntity<List<Map<String, Object>>> getRecommendations(
+            @AuthenticationPrincipal FilmojiUserPrincipal principal,
+            @RequestBody Map<String, String> body) {
+
+        String emojis = body.getOrDefault("emojis", "");
+
+        if (emojis.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        User user = (principal != null) ? principal.getUser() : null;
+        log.info("Recommendation request for user {} with emojis: {}",
+                  user != null ? user.getId() : "anonymous", emojis);
+
+        List<RecommendationService.RecommendationResult> results =
+                recommendationService.recommend(user, emojis, 3);
+
+        List<Map<String, Object>> response = new ArrayList<>();
+        for (RecommendationService.RecommendationResult result : results) {
+            response.add(movieToResponse(result.getMovie(), result.getWhyRecommended()));
+        }
+
+        return ResponseEntity.ok(response);
+    }
+  ```
+  In-take emoji, return ResponseEntity
+
+  Current strategy: hardcoded featuredMovies[0], no          
+  connection between emoji mood and movie shown.
+
+ */
 const columns = [
   {
     initialY: 0,
@@ -63,14 +110,13 @@ const moodLabels = {
   overwhelmed: '🫠 Overwhelmed',
 }
 
-const movies = featuredMovies.slice(0, 5)
-
 function Hero() {
   const { scrollY } = useScroll()
-  const [expanded, setExpanded] = useState(null)   // { emoji, mood, color, rect }
-  const selected = movies[0]
-  const trailerKey = 'S_Pd2pGkq54' // TODO: remove fallback once backend returns trailerKey
-  const trailerLoading = false
+  const [expanded, setExpanded] = useState(null)
+  const [selectedMovie, setSelectedMovie] = useState(null)
+  const [recLoading, setRecLoading] = useState(false)
+  const trailerKey = selectedMovie?.trailerKey ?? null
+  const trailerLoading = recLoading
 
   // Parallax activates once the emoji section scrolls into view (~1 viewport down)
   const y0 = useTransform(scrollY, [400, 1600], [0,  -70])
@@ -82,9 +128,19 @@ function Hero() {
   const handleClick = (e, block) => {
     const rect = e.currentTarget.getBoundingClientRect()
     setExpanded({ ...block, rect })
+    setSelectedMovie(null)
+    setRecLoading(true)
+    fetch(`/api/recommendations?emojis=${encodeURIComponent(block.emoji)}&limit=1`)
+      .then((res) => res.json())
+      .then((data) => setSelectedMovie(data[0]?.movie ?? null))
+      .catch(() => setSelectedMovie(null))
+      .finally(() => setRecLoading(false))
   }
 
-  const handleClose = () => setExpanded(null)
+  const handleClose = () => {
+    setExpanded(null)
+    setSelectedMovie(null)
+  }
 
   return (
     <section className="relative">
@@ -213,21 +269,27 @@ function Hero() {
               {/* ── Right: film detail panel ── */}
               <div className="flex flex-col justify-center py-14 px-10 flex-1 max-w-xl">
 
-                <h2 className="text-2xl font-bold text-white mb-2">{selected.title}</h2>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-xs text-white/40">{selected.year}</span>
-                  <span className="text-xs font-semibold text-yellow-500">★ {selected.rating}</span>
-                  {selected.genres.map((g) => (
-                    <span key={g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-white/50">
-                      {g}
-                    </span>
-                  ))}
-                </div>
-
-                <p className="text-white/60 text-sm leading-relaxed mb-8">
-                  {selected.description ||
-                    'An unforgettable film crafted with a gripping story, stunning visuals, and a tone that perfectly reflects your mood right now.'}
-                </p>
+                {recLoading ? (
+                  <p className="text-white/40 text-sm mb-8">Finding a movie for your mood...</p>
+                ) : selectedMovie ? (
+                  <>
+                    <h2 className="text-2xl font-bold text-white mb-2">{selectedMovie.title}</h2>
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-xs text-white/40">{selectedMovie.releaseYear}</span>
+                      <span className="text-xs font-semibold text-yellow-500">★ {selectedMovie.rating?.toFixed(1)}</span>
+                      {selectedMovie.genres?.split(',').map((g) => (
+                        <span key={g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-white/50">
+                          {g.trim()}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-white/60 text-sm leading-relaxed mb-8">
+                      {selectedMovie.synopsis || 'An unforgettable film that perfectly reflects your mood right now.'}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-white/40 text-sm mb-8">No recommendation found. Try another mood!</p>
+                )}
 
                 <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-white mb-2">
                   Reason we suggest
@@ -243,13 +305,6 @@ function Hero() {
                   className="rounded-2xl flex items-center justify-center mb-8 cursor-pointer hover:brightness-[0.97] transition-all"
                   style={{ backgroundColor: '#e9eaec', height: 372 }}
                 >
-                  {/* <div className="flex flex-col items-center gap-2 text-ink/30">
-                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-                      <circle cx="22" cy="22" r="22" fill="currentColor" fillOpacity="0.12" />
-                      <polygon points="18,14 33,22 18,30" fill="currentColor" fillOpacity="0.45" />
-                    </svg>
-                    <span className="text-xs tracking-widest uppercase">Trailer</span>
-                  </div> */}
                   {trailerLoading ? (
                     <div className="w-full h-full flex items-center justify-center text-white/40 text-sm">
                       Loading trailer...
@@ -258,7 +313,7 @@ function Hero() {
                     <iframe
                       src={`https://www.youtube.com/embed/${trailerKey}`}
                       allowFullScreen
-                      className="w-full h-full"
+                      className="w-full h-full rounded-2xl"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-white/40 text-sm">

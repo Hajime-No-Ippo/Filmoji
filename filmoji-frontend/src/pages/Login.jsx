@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase";
+import Particles from "../components/Particles/Particles"
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -38,23 +39,27 @@ function Login() {
         {/* Left decorative panel (desktop only) */}
         <div className="relative hidden md:flex md:w-5/12 bg-gradient-to-br from-panel via-panel/80 to-panel-end p-10 flex-col justify-between overflow-hidden min-h-[550px]">
           {/* Background video */}
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src="/0217.mp4" type="video/mp4" />
-          </video>
+         <div style={{ width: '100%', height: '600px', position: 'relative' }}>
+            <Particles
+              particleColors={["#ffffff"]}
+              particleCount={200}
+              particleSpread={10}
+              speed={0.1}
+              particleBaseSize={100}
+              moveParticlesOnHover
+              alphaParticles={false}
+              disableRotation={false}
+              pixelRatio={1}
+          />
+          </div>
 
           {/* Dark gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/70" />
 
           {/* Home link */}
-          <Link to="/" className="nav-link relative z-10">
+          <Link to="/" className="nav-link relative z-10 !text-white mb-3">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
             </svg>
           </Link>
 

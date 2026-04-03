@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +44,21 @@ public class MovieController {
     @GetMapping()
     public List<Movie> list() {
         return movies.findAll();
+    }
+
+    // DELETE /api/movies/{id} — remove a movie from the database
+    /**
+     * 
+     * @param id movie.id
+     * @return // StateCode: 204
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        if (!movies.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        movies.deleteById(id);
+        return ResponseEntity.noContent().build(); // 204
     }
 
     // API GET/ Get the trailerKey 
