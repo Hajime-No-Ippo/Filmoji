@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion, useMotionValue, useTransform, animate } from 'motion/react'
 import MovieCard from '../../components/movie/MovieCard'
 import RecommendationGenreStep from '../../components/recommendation/RecommendationGenreStep'
 import { authFetch } from '../../utils/api'
@@ -55,7 +56,7 @@ function adaptMovie(m) {
 
 // ── Step indicator ────────────────────────────────────────────────────────────
 function StepBar({ step }) {
-  const steps = ['Genre', 'Vibe Check', 'Pick Mood']
+  const steps = ['Genre', 'Vibe', 'Mood']
   return (
     <div className="flex items-center gap-2 mb-10">
       {steps.map((label, i) => (
@@ -78,23 +79,31 @@ function Step2({ categories, onNext }) {
     (SWIPE_CARDS[cat] || []).map((prompt) => ({ cat, prompt }))
   )
 
-  const [index, setIndex]   = useState(0)
-  const [liked, setLiked]   = useState([])
-  const [anim, setAnim]     = useState(null) // 'left' | 'right'
+  const [index, setIndex] = useState(0)
+  const [liked, setLiked] = useState([])
+  const x = useMotionValue(0)
+  const rotate = useTransform(x, [-150, 150], [-20, 20])
+  const opacity = useTransform(x, [-150, 0, 150], [0, 1, 0])
 
   const current = allCards[index]
 
   const swipe = (yes) => {
-    setAnim(yes ? 'right' : 'left')
-    setTimeout(() => {
+    animate(x, yes ? 300 : -300, { duration: 0.3 }).then(() => {
       if (yes) setLiked((prev) => [...prev, current])
-      setAnim(null)
-      if (index + 1 >= allCards.length) {
+      const next = index + 1
+      if (next >= allCards.length) {
         onNext(liked.concat(yes ? current : []))
       } else {
-        setIndex((i) => i + 1)
+        x.set(0)
+        setIndex(next)
       }
-    }, 300)
+    })
+  }
+
+  const handleDragEnd = (_, info) => {
+    if (info.offset.x > 80) swipe(true)
+    else if (info.offset.x < -80) swipe(false)
+    else x.set(0)
   }
 
   if (!current) {
@@ -111,17 +120,19 @@ function Step2({ categories, onNext }) {
 
       {/* Card */}
       <div className="flex justify-center mb-10">
-        <div
-          className={`relative w-72 h-96 rounded-3xl border border-white/10 bg-white flex flex-col items-center justify-center gap-4 p-8 text-center shadow-2xl transition-all duration-300
-            ${anim === 'right' ? 'translate-x-24 opacity-0 rotate-12' : ''}
-            ${anim === 'left'  ? '-translate-x-24 opacity-0 -rotate-12' : ''}`}
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          onDragEnd={handleDragEnd}
+          style={{ x, rotate, opacity }}
+          className="relative w-72 h-96 rounded-3xl border border-white/10 bg-white flex flex-col items-center justify-center gap-4 p-8 text-center shadow-2xl cursor-grab active:cursor-grabbing"
         >
           <span className="text-5xl">
             {CATEGORIES.find((c) => c.name === current.cat)?.emoji || '🎬'}
           </span>
           <span className="text-xs font-semibold text-accent uppercase tracking-widest">{current.cat}</span>
           <p className="text-ink text-lg font-medium leading-snug">{current.prompt}</p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Buttons */}

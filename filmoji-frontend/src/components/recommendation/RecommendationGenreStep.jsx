@@ -62,8 +62,8 @@ function RecommendationGenreStep({ onNext }) {
       <p className="section-subtitle mb-8">Step 1: open the menu and choose 1 genre bubble</p>
 
       <div className="relative flex-1 min-h-[32rem] rounded-[2rem] border border-white bg-white overflow-hidden isolate shadow-xl">
-        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-          <p className="text-sm text-[#1C1600]/55 mt-3">
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
+          <p className="text-sm text-[#1C1600]/55 mt-3 text-center align-center justify-center items-center font-[Inter]">
             {selected ? `Selected: ${selected}` : 'Using the same palette as the emoji blocks screen.'}
           </p>
         </div>

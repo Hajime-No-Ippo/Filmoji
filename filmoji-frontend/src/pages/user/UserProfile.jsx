@@ -13,11 +13,11 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { featuredMovies } from "../../data/movies";
 
 function UserProfile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [allMovies, setAllMovies] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -25,6 +25,13 @@ function UserProfile() {
   const [activeTab, setActiveTab] = useState("overview"); // "overview", "add" or "my-reviews"
   const [editingReview, setEditingReview] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch('/api/movies')
+      .then((res) => res.json())
+      .then((data) => setAllMovies(data))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -61,12 +68,7 @@ function UserProfile() {
       const reviews = [];
       querySnapshot.forEach((doc) => {
         const reviewData = doc.data();
-        const movie = featuredMovies.find((m) => m.id === reviewData.movieId);
-        reviews.push({
-          id: doc.id,
-          ...reviewData,
-          movieTitle: movie ? movie.title : "Unknown Movie",
-        });
+        reviews.push({ id: doc.id, ...reviewData });
       });
 
       reviews.sort((a, b) => {
@@ -411,13 +413,13 @@ function UserProfile() {
                   <option value="" disabled>
                     -- Please select a movie --
                   </option>
-                  {featuredMovies.map((movie) => (
+                  {allMovies.map((movie) => (
                     <option
                       key={movie.id}
                       value={movie.id}
                       className="bg-white"
                     >
-                      {movie.title} ({movie.year})
+                      {movie.title} ({movie.releaseYear})
                     </option>
                   ))}
                 </select>
@@ -544,7 +546,9 @@ function UserProfile() {
                 </button>
               </div>
             ) : (
-              userReviews.map((review) => (
+              userReviews.map((review) => {
+                const movieTitle = allMovies.find((m) => m.id === review.movieId)?.title ?? "Unknown Movie"
+                return (
                 <div
                   key={review.id}
                   className="rounded-2xl p-6 border-2 transition"
@@ -559,7 +563,7 @@ function UserProfile() {
                         className="text-xl font-bold"
                         style={{ color: "var(--color-ink)" }}
                       >
-                        {review.movieTitle}
+                        {movieTitle}
                       </h3>
                       <p
                         className="text-sm"
@@ -606,8 +610,9 @@ function UserProfile() {
                     </button>
                   </div>
                 </div>
-              ))
-            )}
+              )
+              }))
+            }
           </div>
         )}
       </div>
