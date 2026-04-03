@@ -3,9 +3,10 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { featuredMovies } from '../data/movies'
 import { useMoviesWithPosters, useMoviesTrailer } from '../hooks/useMoviesAPIs'
 import { ContainerScroll } from '../components/ContainerScroll'
-import ReviewSnippetCard from '../components/ReviewSnippetCard'
+import ReviewsColumn from '../components/ReviewsColumn/ReviewsColumn'
 import { db } from '../../firebase'
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore'
+import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore'
+import { getAuth } from 'firebase/auth'
 
 function MovieDetail() {
   const { id } = useParams()
@@ -18,6 +19,36 @@ function MovieDetail() {
   const navigate = useNavigate()
 
   const [reviews, setReviews] = useState([])
+  const [rating, setRating] = useState(0)
+  const [comment, setComment] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const currentUser = getAuth().currentUser
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault()
+    if (!currentUser) return
+    if (rating < 1 || rating > 10 || !comment.trim()) return
+    setSubmitting(true)
+    try {
+      await addDoc(collection(db, 'reviews'), {
+        movieId: movie.id,
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        rating: parseInt(rating),
+        comment: comment.trim(),
+        createdAt: serverTimestamp()
+      })
+      setRating(0)
+      setComment('')
+      // refresh snippets
+      const q = query(collection(db, 'reviews'), where('movieId', '==', movie.id), orderBy('createdAt', 'desc'), limit(3))
+      const snap = await getDocs(q)
+      setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+    } finally {
+      setSubmitting(false)
+    }
+  }
   useEffect(() => {
     if (!movie?.id) return
     const q = query(
@@ -99,7 +130,7 @@ function MovieDetail() {
         
 
           {/* Links overlay at bottom */}
-          <div className="w-full relative">
+          {/* <div className="w-full relative">
             <Link
               to="/reviews"
               className="flex-1 text-center py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors no-underline"
@@ -112,22 +143,59 @@ function MovieDetail() {
             >
               More Movies
             </Link> 
-          </div>
+          </div> */}
           
 
           {/* Rating and Reviews Sections */}
           <section id="reviews" className="section">
             <h3 className="text-3xl font-bold mb-6">{movie.title} Ratings & Reviews</h3>
-            {reviews.length === 0 ? (
-              <p className="text-muted text-sm">No reviews yet.</p>
+
+            {/* Write a review form */}
+            {currentUser ? (
+              <form onSubmit={handleSubmitReview} className="card-base p-5 mb-6 flex flex-col gap-3">
+                <p className="text-sm font-semibold text-ink">Write a Review</p>
+                <div className="flex items-center gap-3">
+                  <label className="text-sm text-muted">Rating</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={rating || ''}
+                    onChange={(e) => setRating(e.target.value)}
+                    placeholder="1–10"
+                    className="input-field w-20"
+                    required
+                  />
+                </div>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Share your thoughts..."
+                  rows={3}
+                  className="input-field resize-none"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-primary px-6 self-start"
+                >
+                  {submitting ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </form>
             ) : (
-              <div className="flex flex-col gap-3">
-                {reviews.map((review) => (
-                  <ReviewSnippetCard key={review.id} review={review} movieId={movie.id} />
-                ))}
+              <p className="text-sm text-muted mb-6">
+                <Link to="/login" className="accent-link">Sign in</Link> to leave a review.
+              </p>
+            )}
+            {reviews.length === 0 ? (
+              <p className="text-muted text-sm">No reviews yet. Be the first!</p>
+            ) : (
+              <div>
+                <ReviewsColumn reviews={reviews} duration={20} className="max-h-[520px]" />
                 <button
                   onClick={() => navigate(`/reviews?movieId=${movie.id}`)}
-                  className="text-sm text-accent hover:text-accent-hover text-left mt-1"
+                  className="text-sm text-accent hover:text-accent-hover text-left mt-4 block"
                 >
                   See all reviews →
                 </button>

@@ -43,7 +43,19 @@ public class RecommendationController {
             this.userProfileService = userProfileService;
             this.tmdbService        = tmdbService;
         }
-     * These should be the attributes of what we have 🔼
+
+        public static class RecommendationResult {
+            private final Movie movie;
+            private final String whyRecommended;
+        }
+        ```
+        
+     * These should be the attributes of what we have 🔼 in the recommend entities
+
+            - call the recommendationService
+            - ask it to compute recommendations for this user
+            - based on the selected emojis
+            - and return 3 results
      */
     @PostMapping
     public ResponseEntity<List<Map<String, Object>>> getRecommendations(

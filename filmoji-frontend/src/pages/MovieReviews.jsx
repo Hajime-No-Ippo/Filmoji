@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { db } from "../../firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
 import { featuredMovies } from "../data/movies";
+import { ReviewsWall } from "../components/ReviewsColumn/ReviewsColumn";
 
 function MovieReviews() {
   const [searchParams] = useSearchParams()
@@ -10,6 +11,20 @@ function MovieReviews() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
+  const [allReviews, setAllReviews] = useState([]);
+
+  // Fetch all recent reviews for the wall
+  useEffect(() => {
+    const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(30))
+    getDocs(q).then((snap) => {
+      const data = snap.docs.map((d) => {
+        const r = d.data()
+        const movie = featuredMovies.find((m) => m.id === r.movieId)
+        return { id: d.id, ...r, movieTitle: movie?.title }
+      })
+      setAllReviews(data)
+    })
+  }, []);
 
   useEffect(() => {
     if (selectedMovie) {
@@ -59,21 +74,42 @@ function MovieReviews() {
   return (
     <div
       style={{ backgroundColor: "var(--color-dark)" }}
-      className="min-h-screen pt-24 pb-12 px-4"
+      className="min-h-screen pb-12"
     >
-      <div className="max-w-5xl mx-auto">
+      {/* ── Reviews wall hero ── */}
+      {allReviews.length > 0 && (
+        <div className="relative pt-24 pb-16 px-4 overflow-hidden">
+          <div className="text-center mb-10">
+            <h1 style={{ color: 'var(--color-ink)' }} className="text-4xl md:text-5xl font-bold mb-3">
+              What People Are Saying
+            </h1>
+            <p style={{ color: 'var(--color-muted)' }} className="text-lg">
+              Real reviews from Filmoji users
+            </p>
+          </div>
+          <ReviewsWall reviews={allReviews} className="max-h-[480px]" />
+          {/* fade out bottom */}
+          <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, transparent, var(--color-dark))' }}
+          />
+        </div>
+      )}
+
+      <div className="max-w-5xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
           <h1
             style={{ color: "var(--color-ink)" }}
             className="text-4xl md:text-5xl font-bold mb-4"
           >
-            Movie Reviews
+            Check by Movies
           </h1>
           <p style={{ color: "var(--color-muted)" }} className="text-lg">
             See what other users think about movies
           </p>
         </div>
+
+        <section className="description"></section>
 
         {/* Movie Selection */}
         <div
