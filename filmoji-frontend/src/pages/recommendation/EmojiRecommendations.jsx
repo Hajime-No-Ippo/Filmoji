@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useMotionValue, useTransform, animate } from 'motion/react'
+import { auth } from '../../../firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 import MovieCard from '../../components/movie/MovieCard'
 import RecommendationGenreStep from '../../components/recommendation/RecommendationGenreStep'
 import { authFetch } from '../../utils/api'
@@ -269,20 +271,82 @@ function Step3({ likedVibes }) {
   )
 }
 
+// ── Login gate ────────────────────────────────────────────────────────────────
+function LoginGate() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-center">
+      <div className="text-6xl mb-6">🎬</div>
+      <h2 className="text-2xl font-bold text-ink mb-3">Sign in to get recommendations</h2>
+      <p className="section-subtitle mb-8 max-w-sm font-[Inter]">
+        Create a free account so we can learn your taste and personalise every pick for you.
+      </p>
+      <div className="flex gap-4">
+        <Link to="/login?redirect=/emoji-recommendations" className="px-6 py-3 rounded-full bg-accent text-ink font-semibold text-sm hover:brightness-110 transition-all">
+          Log in
+        </Link>
+        <Link to="/register?redirect=/emoji-recommendations" className="px-6 py-3 rounded-full border border-white/20 text-ink text-sm hover:bg-white/10 transition-all">
+          Sign up
+        </Link>
+      </div>
+    </div>
+  )
+}
+
 // ── Main flow ─────────────────────────────────────────────────────────────────
 function EmojiRecommendations() {
+  const [authState, setAuthState]   = useState('loading') // 'loading' | 'guest' | 'user'
+  const [onboarded, setOnboarded]   = useState(false)
   const [step, setStep]             = useState(1)
   const [categories, setCategories] = useState([])
   const [likedVibes, setLikedVibes] = useState([])
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        setAuthState('guest')
+        return
+      }
+      // Check onboarding status from backend
+      try {
+        const res = await authFetch('/api/users/me')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.onboardingComplete) {
+            setOnboarded(true)
+            setStep(3) // skip genre + vibe steps
+          }
+        }
+      } catch (_) {}
+      setAuthState('user')
+    })
+    return () => unsub()
+  }, [])
 
   const handleStep1 = (selected) => {
     setCategories(selected)
     setStep(2)
   }
 
-  const handleStep2 = (liked) => {
+  const handleStep2 = async (liked) => {
     setLikedVibes(liked)
+    // Save preferences to backend before proceeding to Step 3
+    try {
+      await authFetch('/api/users/onboarding', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ genres: categories, likedVibes: liked }),
+      })
+      setOnboarded(true)
+    } catch (_) {}
     setStep(3)
+  }
+
+  if (authState === 'loading') {
+    return (
+      <div className="min-h-screen pt-24 pb-16 px-6 flex items-center justify-center">
+        <p className="text-muted">Loading...</p>
+      </div>
+    )
   }
 
   return (
@@ -290,11 +354,16 @@ function EmojiRecommendations() {
       <div className="container-main">
         <Link to="/" className="accent-link text-sm mb-8 inline-block">← Back</Link>
 
-        <StepBar step={step} />
-
-        {step === 1 && <RecommendationGenreStep onNext={handleStep1} />}
-        {step === 2 && <Step2 categories={categories} onNext={handleStep2} />}
-        {step === 3 && <Step3 likedVibes={likedVibes} />}
+        {authState === 'guest' ? (
+          <LoginGate />
+        ) : (
+          <>
+            {!onboarded && <StepBar step={step} />}
+            {step === 1 && <RecommendationGenreStep onNext={handleStep1} />}
+            {step === 2 && <Step2 categories={categories} onNext={handleStep2} />}
+            {step === 3 && <Step3 likedVibes={likedVibes} />}
+          </>
+        )}
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
 import Particles from "../../components/effects/Particles/Particles"
@@ -8,14 +8,16 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get('redirect') || '/'
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     console.log('Login:', { email, password, remember })
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/"); // or navigate("/dashboard") to go to home page
+      navigate(redirect)
     } catch (error) {
       alert(error.message);
     }
