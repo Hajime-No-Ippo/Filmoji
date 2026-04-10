@@ -1,43 +1,52 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../../../firebase";
+import Interests from "./Interests";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   collection,
-  addDoc,
   query,
   where,
   getDocs,
   orderBy,
   deleteDoc,
   doc,
-  updateDoc,
+  getDoc,
 } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function UserProfile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [allMovies, setAllMovies] = useState([]);
-  const [selectedMovie, setSelectedMovie] = useState(null);
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
   const [userReviews, setUserReviews] = useState([]);
-  const [activeTab, setActiveTab] = useState("overview"); // "overview", "add" or "my-reviews"
-  const [editingReview, setEditingReview] = useState(null);
+  const [profile, setProfile] = useState({ username: "", bio: "" });
   const navigate = useNavigate();
 
+  const ratedCount = new Set(userReviews.map((r) => r.movieId)).size;
+  const reviewedCount = ratedCount;
+
+  const previewReviews = userReviews.slice(0, 3);
+
+  const ratedMovies = userReviews
+    .map((review) => {
+      const movie = allMovies.find((m) => m.id === review.movieId);
+      return { review, movie };
+    })
+    .filter(({ movie }) => Boolean(movie));
+
   useEffect(() => {
-    fetch('/api/movies')
+    fetch("/api/movies")
       .then((res) => res.json())
       .then((data) => setAllMovies(data))
-      .catch(() => {})
-  }, [])
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         loadUserReviews(currentUser.uid);
+        loadUserProfile(currentUser);
       } else {
         navigate("/login");
       }
@@ -59,7 +68,7 @@ function UserProfile() {
           orderBy("createdAt", "desc"),
         );
         querySnapshot = await getDocs(orderedQuery);
-      } catch (orderedQueryError) {
+      } catch {
         // Fallback when Firestore index/ordering is unavailable.
         const fallbackQuery = query(reviewsRef, where("userId", "==", userId));
         querySnapshot = await getDocs(fallbackQuery);
@@ -83,74 +92,32 @@ function UserProfile() {
     }
   };
 
-  const handleSubmitReview = async (e) => {
-    e.preventDefault();
-    if (!selectedMovie || !user) return;
-
+  const loadUserProfile = async (currentUser) => {
     try {
-      if (editingReview) {
-        // Update existing review
-        const reviewRef = doc(db, "reviews", editingReview.id);
-        await updateDoc(reviewRef, {
-          rating: parseInt(rating),
-          comment: comment,
-          updatedAt: new Date(),
+      const profileRef = doc(db, "userProfiles", currentUser.uid);
+      const snapshot = await getDoc(profileRef);
+
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setProfile({
+          username: data.username || "",
+          bio: data.bio || "",
         });
-        alert("Review updated!");
-        setEditingReview(null);
-      } else {
-        // Add new review
-        await addDoc(collection(db, "reviews"), {
-          userId: user.uid,
-          userEmail: user.email,
-          movieId: parseInt(selectedMovie),
-          rating: parseInt(rating),
-          comment: comment,
-          createdAt: new Date(),
-        });
-        alert("Review submitted!");
+        return;
       }
 
-      // Reset form
-      setSelectedMovie(null);
-      setRating(5);
-      setComment("");
-
-      // Reload reviews
-      loadUserReviews(user.uid);
-      setActiveTab("my-reviews");
+      setProfile({
+        username: currentUser.displayName || "",
+        bio: "",
+      });
     } catch (error) {
-      console.error("Error submitting review:", error);
-      alert("Submission failed, please try again");
+      console.error("Error loading user profile:", error);
+      setProfile({ username: "", bio: "" });
     }
   };
 
   const handleEditReview = (review) => {
-    setEditingReview(review);
-    setSelectedMovie(review.movieId.toString());
-    setRating(review.rating);
-    setComment(review.comment);
-    setActiveTab("add");
-  };
-
-  const handleDeleteReview = async (reviewId) => {
-    if (!confirm("Are you sure you want to delete this review?")) return;
-
-    try {
-      await deleteDoc(doc(db, "reviews", reviewId));
-      alert("Review deleted");
-      loadUserReviews(user.uid);
-    } catch (error) {
-      console.error("Error deleting review:", error);
-      alert("Deletion failed, please try again");
-    }
-  };
-
-  const cancelEdit = () => {
-    setEditingReview(null);
-    setSelectedMovie(null);
-    setRating(5);
-    setComment("");
+    navigate("/profile/ratings", { state: { review } });
   };
 
   if (loading) {
@@ -168,16 +135,15 @@ function UserProfile() {
 
   return (
     <div
-      className="min-h-screen pt-24 px-4"
+      className="min-h-screen pt-24 px-4 lg:px-10"
       style={{ backgroundColor: "var(--color-dark)" }}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* User Info Header */}
         <div
           className="rounded-2xl p-6 mb-8 shadow-lg "
           style={{
             backgroundColor: "var(--color-card)",
-            borderColor: "var(--color-border)",
           }}
         >
           <div className="flex items-center space-x-4">
@@ -190,431 +156,298 @@ function UserProfile() {
             >
               {user?.email?.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <h1
-                className="text-2xl font-bold"
-                style={{ color: "var(--color-ink)" }}
+            <div className="flex-1">
+              <div className="flex items-center justify-between gap-4">
+                <h1
+                  className="text-2xl font-bold"
+                  style={{ color: "var(--color-ink)" }}
+                >
+                  My Profile
+                </h1>
+                <button
+                  onClick={() => navigate("/profile/username")}
+                  className="font-medium transition hover:underline"
+                  style={{ color: "var(--color-mood-blue)" }}
+                  type="button"
+                >
+                  Edit
+                </button>
+              </div>
+
+              <p
+                className="mt-1 text-lg font-semibold"
+                style={{ color: "var(--color-accent)" }}
               >
-                My Profile
-              </h1>
-              <p style={{ color: "var(--color-muted)" }}>{user?.email}</p>
+                {profile.username || "Set your username"}
+              </p>
+              {profile.bio ? (
+                <p className="mt-1" style={{ color: "var(--color-muted)" }}>
+                  {profile.bio}
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
 
-        {/* Overview - Main Selection Page */}
-        {activeTab === "overview" && (
-          <div className="space-y-6">
-            <h2
-              className="text-2xl font-bold mb-6 text-center"
-              style={{ color: "var(--color-ink)" }}
-            >
-              Choose an option to continue
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Personal Preference Card */}
-              <div
-                onClick={() => navigate("/personal-preference")}
-                className="group rounded-2xl p-8 border-2 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg"
-                style={{
-                  backgroundColor: "var(--color-card)",
-                  borderColor: "var(--color-accent)",
-                  boxShadow: "0 4px 6px rgba(245, 197, 25, 0.1)",
-                }}
-              >
-                <div className="text-center">
-                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
-                    ⭐
-                  </div>
-                  <h3
-                    className="text-2xl font-bold mb-3"
-                    style={{ color: "var(--color-ink)" }}
-                  >
-                    Personal Preference
-                  </h3>
-                  <p
-                    className="mb-4 leading-relaxed"
-                    style={{ color: "var(--color-muted)" }}
-                  >
-                    Set your movie genre preferences and customize your
-                    experience
-                  </p>
-                  <div
-                    className="inline-flex items-center font-medium group-hover:translate-x-1 transition-transform"
-                    style={{ color: "var(--color-accent)" }}
-                  >
-                    Configure Preferences
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              {/* My Reviews Card */}
-              <div
-                onClick={() => setActiveTab("my-reviews")}
-                className="group rounded-2xl p-8 border-2 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg"
-                style={{
-                  backgroundColor: "var(--color-card)",
-                  borderColor: "var(--color-accent)",
-                  boxShadow: "0 4px 6px rgba(245, 197, 25, 0.1)",
-                }}
-              >
-                <div className="text-center">
-                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
-                    📝
-                  </div>
-                  <h3
-                    className="text-2xl font-bold mb-3"
-                    style={{ color: "var(--color-ink)" }}
-                  >
-                    My Reviews
-                  </h3>
-                  <p
-                    className="mb-4 leading-relaxed"
-                    style={{ color: "var(--color-muted)" }}
-                  >
-                    View, add, edit, and manage all your movie reviews
-                  </p>
-                  <div
-                    className="inline-flex items-center font-medium group-hover:translate-x-1 transition-transform"
-                    style={{ color: "var(--color-accent)" }}
-                  >
-                    Manage Reviews ({userReviews.length})
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tabs - Only show when not in overview */}
-        {activeTab !== "overview" && (
-          <div className="flex space-x-4 mb-6">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className="px-6 py-3 rounded-lg font-medium transition"
-              style={{
-                backgroundColor: "var(--color-card-hover)",
-                color: "var(--color-ink)",
-                border: `2px solid var(--color-border)`,
-              }}
-            >
-              ← Back
-            </button>
-            <button
-              onClick={() => setActiveTab("add")}
-              className="px-6 py-3 rounded-lg font-medium transition"
-              style={
-                activeTab === "add"
-                  ? {
-                      backgroundColor: "var(--color-accent)",
-                      color: "var(--color-ink)",
-                      border: `2px solid var(--color-accent)`,
-                    }
-                  : {
-                      backgroundColor: "var(--color-card-hover)",
-                      color: "var(--color-ink)",
-                      border: `2px solid var(--color-border)`,
-                    }
-              }
-            >
-              {editingReview ? "Edit Review" : "Add Review"}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab("my-reviews");
-                cancelEdit();
-              }}
-              className="px-6 py-3 rounded-lg font-medium transition"
-              style={
-                activeTab === "my-reviews"
-                  ? {
-                      backgroundColor: "var(--color-accent)",
-                      color: "var(--color-ink)",
-                      border: `2px solid var(--color-accent)`,
-                    }
-                  : {
-                      backgroundColor: "var(--color-card-hover)",
-                      color: "var(--color-ink)",
-                      border: `2px solid var(--color-border)`,
-                    }
-              }
-            >
-              My Reviews ({userReviews.length})
-            </button>
-          </div>
-        )}
-
-        {/* Add/Edit Review Tab */}
-        {activeTab === "add" && (
+        <div className="space-y-6">
+          {/* Personal Preference */}
           <div
-            className="rounded-2xl p-8 border-2"
+            className="rounded-2xl p-6 shadow-lg"
             style={{
               backgroundColor: "var(--color-card)",
-              borderColor: "var(--color-border)",
             }}
           >
-            <h2
-              className="text-2xl font-bold mb-6"
-              style={{ color: "var(--color-ink)" }}
-            >
-              {editingReview ? "Edit Movie Review" : "Rate a Movie"}
-            </h2>
-            <form onSubmit={handleSubmitReview} className="space-y-6">
-              {/* Movie Selection */}
-              <div>
-                <label
-                  className="block font-medium mb-2"
-                  style={{ color: "var(--color-ink)" }}
-                >
-                  Select Movie *
-                </label>
-                <select
-                  value={selectedMovie || ""}
-                  onChange={(e) => setSelectedMovie(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2"
-                  style={{
-                    backgroundColor: "var(--color-dark-light)",
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-ink)",
-                    border: `2px solid var(--color-border)`,
-                    focusRingColor: "var(--color-accent)",
-                  }}
-                >
-                  <option value="" disabled>
-                    -- Please select a movie --
-                  </option>
-                  {allMovies.map((movie) => (
-                    <option
-                      key={movie.id}
-                      value={movie.id}
-                      className="bg-white"
-                    >
-                      {movie.title} ({movie.releaseYear})
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="flex items-center justify-between">
+              <h2
+                className="text-2xl font-bold"
+                style={{ color: "var(--color-ink)" }}
+              >
+                Personal Preference
+              </h2>
+              <button
+                onClick={() => navigate("/personal-preference")}
+                className="font-medium transition hover:underline"
+                style={{ color: "var(--color-mood-blue)" }}
+              >
+                Edit
+              </button>
+            </div>
+          </div>
 
-              {/* Rating */}
-              <div>
-                <label
-                  className="block font-medium mb-2"
+          {/* Ratings (link to rate/review page) */}
+          <div
+            className="rounded-2xl p-6 shadow-lg"
+            style={{
+              backgroundColor: "var(--color-card)",
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h2
+                  className="text-2xl font-bold"
                   style={{ color: "var(--color-ink)" }}
                 >
-                  Rating (1-10) *
-                </label>
-                <div className="flex items-center space-x-4">
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={rating}
-                    onChange={(e) => setRating(e.target.value)}
-                    className="flex-1 h-2 rounded-lg appearance-none cursor-pointer"
-                    style={{
-                      backgroundColor: "var(--color-border)",
-                      accentColor: "var(--color-accent)",
-                    }}
-                  />
-                  <span
-                    className="text-3xl font-bold px-4 py-2 rounded-lg min-w-[60px] text-center"
-                    style={{
-                      backgroundColor: "var(--color-accent)",
-                      color: "var(--color-ink)",
-                    }}
-                  >
-                    {rating}
-                  </span>
-                </div>
-                <div
-                  className="flex justify-between text-xs mt-1"
+                  Ratings
+                </h2>
+                <span
+                  className="text-sm font-semibold"
                   style={{ color: "var(--color-muted)" }}
                 >
-                  <span>Poor</span>
-                  <span>Great</span>
+                  {ratedCount}
+                </span>
+              </div>
+              <button
+                onClick={() => navigate("/profile/ratings")}
+                className="font-medium transition hover:underline"
+                style={{ color: "var(--color-mood-blue)" }}
+              >
+                Edit
+              </button>
+            </div>
+            <p className="mt-2" style={{ color: "var(--color-muted)" }}>
+              My Ratings.
+            </p>
+
+            {ratedMovies.length > 0 && (
+              <div className="mt-6 overflow-x-auto">
+                <div className="flex gap-6 pb-2">
+                  {ratedMovies.map(({ review, movie }) => {
+                    const poster =
+                      movie?.posterUrl ||
+                      movie?.poster ||
+                      movie?.posterPath ||
+                      movie?.poster_path ||
+                      "";
+
+                    return (
+                      <div
+                        key={review.id}
+                        className="shrink-0 w-64 rounded-2xl shadow-lg overflow-hidden"
+                        style={{ backgroundColor: "var(--color-card)" }}
+                      >
+                        <Link to={`/movie/${movie.id}`} className="block">
+                          {poster ? (
+                            <img
+                              src={poster}
+                              alt={movie.title}
+                              className="aspect-[2/3] w-full object-cover"
+                            />
+                          ) : (
+                            <div
+                              className="aspect-[2/3] w-full flex items-center justify-center"
+                              style={{
+                                backgroundColor: "var(--color-card-hover)",
+                              }}
+                            >
+                              <span style={{ color: "var(--color-muted)" }}>
+                                No poster
+                              </span>
+                            </div>
+                          )}
+                        </Link>
+
+                        <div className="p-4">
+                          <div className="flex items-center gap-2">
+                            <span style={{ color: "var(--color-accent)" }}>
+                              ★
+                            </span>
+                            <span
+                              className="font-semibold"
+                              style={{ color: "var(--color-ink)" }}
+                            >
+                              {review.rating}
+                            </span>
+                            <span style={{ color: "var(--color-muted)" }}>
+                              /10
+                            </span>
+                          </div>
+                          <div
+                            className="mt-2 text-lg font-semibold leading-snug"
+                            style={{ color: "var(--color-ink)" }}
+                          >
+                            {movie.title}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
+            )}
+          </div>
 
-              {/* Comment */}
-              <div>
-                <label
-                  className="block font-medium mb-2"
+          {/* My Reviews (preview) */}
+          <div
+            className="rounded-2xl p-6 shadow-lg"
+            style={{ backgroundColor: "var(--color-card)" }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h2
+                  className="text-2xl font-bold"
                   style={{ color: "var(--color-ink)" }}
                 >
-                  Review *
-                </label>
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  required
-                  rows="5"
-                  placeholder="Share your thoughts about this movie..."
-                  className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2"
-                  style={{
-                    backgroundColor: "var(--color-dark-light)",
-                    borderColor: "var(--color-border)",
-                    color: "var(--color-ink)",
-                    border: `2px solid var(--color-border)`,
-                  }}
-                />
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex space-x-4">
-                <button
-                  type="submit"
-                  className="flex-1 py-3 px-6 rounded-lg font-medium transition"
-                  style={{
-                    backgroundColor: "var(--color-accent)",
-                    color: "var(--color-ink)",
-                  }}
+                  Reviews
+                </h2>
+                <span
+                  className="text-sm font-semibold"
+                  style={{ color: "var(--color-muted)" }}
                 >
-                  {editingReview ? "Update Review" : "Submit Review"}
-                </button>
-                {editingReview && (
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    className="px-6 py-3 rounded-lg font-medium transition"
-                    style={{
-                      backgroundColor: "var(--color-card-hover)",
-                      color: "var(--color-ink)",
-                      border: `2px solid var(--color-border)`,
-                    }}
-                  >
-                    Cancel
-                  </button>
-                )}
+                  {reviewedCount}
+                </span>
               </div>
-            </form>
-          </div>
-        )}
+            </div>
 
-        {/* My Reviews Tab */}
-        {activeTab === "my-reviews" && (
-          <div className="space-y-4">
-            {userReviews.length === 0 ? (
-              <div
-                className="rounded-2xl p-12 border-2 text-center"
-                style={{
-                  backgroundColor: "var(--color-card)",
-                  borderColor: "var(--color-border)",
-                }}
-              >
-                <p className="text-lg" style={{ color: "var(--color-muted)" }}>
-                  You haven't added any reviews yet
-                </p>
-                <button
-                  onClick={() => setActiveTab("add")}
-                  className="mt-4 px-6 py-2 rounded-lg transition font-medium"
-                  style={{
-                    backgroundColor: "var(--color-accent)",
-                    color: "var(--color-ink)",
-                  }}
-                >
-                  Add your first review
-                </button>
-              </div>
-            ) : (
-              userReviews.map((review) => {
-                const movieTitle = allMovies.find((m) => m.id === review.movieId)?.title ?? "Unknown Movie"
+            <p className="mt-2" style={{ color: "var(--color-muted)" }}>
+              My Ratings.
+            </p>
+
+            <div className="mt-5 space-y-4">
+              {previewReviews.map((review) => {
+                const movie = allMovies.find((m) => m.id === review.movieId);
+                const createdDate =
+                  review.createdAt?.toDate?.() ||
+                  (typeof review.createdAt?.seconds === "number"
+                    ? new Date(review.createdAt.seconds * 1000)
+                    : null);
+                const formattedDate = createdDate
+                  ? new Intl.DateTimeFormat("en-CA", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    }).format(createdDate)
+                  : "";
+                const poster =
+                  movie?.posterUrl ||
+                  movie?.poster ||
+                  movie?.posterPath ||
+                  movie?.poster_path ||
+                  "";
+
                 return (
-                <div
-                  key={review.id}
-                  className="rounded-2xl p-6 border-2 transition"
-                  style={{
-                    backgroundColor: "var(--color-card)",
-                    borderColor: "var(--color-border)",
-                  }}
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3
-                        className="text-xl font-bold"
-                        style={{ color: "var(--color-ink)" }}
-                      >
-                        {movieTitle}
-                      </h3>
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--color-muted)" }}
-                      >
-                        {review.createdAt?.toDate().toLocaleDateString("zh-CN")}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <span
-                        className="text-2xl font-bold px-3 py-1 rounded-lg"
-                        style={{
-                          backgroundColor: "var(--color-accent)",
-                          color: "var(--color-ink)",
-                        }}
-                      >
-                        {review.rating}/10
-                      </span>
-                    </div>
-                  </div>
-                  <p
-                    className="mb-4 leading-relaxed"
-                    style={{ color: "var(--color-ink)" }}
+                  <button
+                    key={review.id}
+                    type="button"
+                    onClick={() => handleEditReview(review)}
+                    className="w-full text-left rounded-xl p-4 transition shadow-md hover:shadow-lg"
+                    style={{ backgroundColor: "var(--color-card)" }}
                   >
-                    {review.comment}
-                  </p>
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => handleEditReview(review)}
-                      className="px-4 py-2 text-white rounded-lg text-sm transition font-medium"
-                      style={{
-                        backgroundColor: "var(--color-accent)",
-                        color: "var(--color-ink)",
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteReview(review.id)}
-                      className="px-4 py-2 text-white rounded-lg text-sm transition font-medium"
-                      style={{ backgroundColor: "#E74C3C", color: "white" }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              )
-              }))
-            }
+                    <div className="flex gap-4">
+                      <div className="shrink-0">
+                        {poster ? (
+                          <img
+                            src={poster}
+                            alt={movie?.title || "Movie poster"}
+                            className="w-14 h-20 object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div
+                            className="w-14 h-20 rounded-lg flex items-center justify-center text-xs"
+                            style={{
+                              backgroundColor: "var(--color-dark-light)",
+                              color: "var(--color-muted)",
+                            }}
+                          >
+                            No
+                            <br />
+                            poster
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div
+                            className="text-lg font-semibold leading-snug truncate"
+                            style={{ color: "var(--color-ink)" }}
+                            title={movie?.title || `Movie #${review.movieId}`}
+                          >
+                            {movie?.title || `Movie #${review.movieId}`}
+                          </div>
+
+                          <div className="shrink-0 flex items-center gap-2">
+                            <span style={{ color: "var(--color-accent)" }}>
+                              ★
+                            </span>
+                            <span
+                              className="font-semibold"
+                              style={{ color: "var(--color-ink)" }}
+                            >
+                              {review.rating}
+                            </span>
+                            <span style={{ color: "var(--color-muted)" }}>
+                              /10
+                            </span>
+                          </div>
+                        </div>
+
+                        {review.comment ? (
+                          <div
+                            className="mt-3 text-sm leading-relaxed"
+                            style={{ color: "var(--color-muted)" }}
+                          >
+                            {review.comment}
+                          </div>
+                        ) : null}
+
+                        {formattedDate ? (
+                          <div
+                            className={`${review.comment ? "mt-2" : "mt-3"} text-xs text-right`}
+                            style={{ color: "var(--color-muted)" }}
+                          >
+                            {formattedDate}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        )}
+
+          <Interests userReviews={userReviews} allMovies={allMovies} />
+        </div>
       </div>
     </div>
   );

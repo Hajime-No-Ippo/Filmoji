@@ -11,6 +11,8 @@ import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Dashboard from "./pages/user/Dashboard";
 import UserProfile from "./pages/user/UserProfile";
+import Ratings from "./pages/user/Ratings";
+import Username from "./pages/user/Username";
 import MovieReviews from "./pages/movie/MovieReviews";
 import MovieDetail from "./pages/movie/MovieDetail";
 import Recommendations from "./pages/recommendation/Recommendations";
@@ -58,6 +60,22 @@ function App() {
             }
           />
           <Route
+            path="/profile/ratings"
+            element={
+              <ProtectedRoute>
+                <Ratings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/username"
+            element={
+              <ProtectedRoute>
+                <Username />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/personal-preference"
             element={
               <ProtectedRoute>
@@ -66,7 +84,10 @@ function App() {
             }
           />
           <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/emoji-recommendations" element={<EmojiRecommendations />} />
+          <Route
+            path="/emoji-recommendations"
+            element={<EmojiRecommendations />}
+          />
           <Route path="/forget" element={<ForgotPassword />} />
         </Routes>
       </main>
