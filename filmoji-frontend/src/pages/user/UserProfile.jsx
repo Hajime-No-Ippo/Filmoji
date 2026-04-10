@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { auth, db } from "../../../firebase";
-import Interests from "./Interests";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   collection,
@@ -445,8 +444,6 @@ function UserProfile() {
               })}
             </div>
           </div>
-
-          <Interests userReviews={userReviews} allMovies={allMovies} />
         </div>
       </div>
     </div>
