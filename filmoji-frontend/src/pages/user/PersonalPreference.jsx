@@ -135,10 +135,9 @@ function PersonalPreference() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div
-          className="rounded-2xl p-6 mb-8 border-2"
+          className="rounded-2xl p-6 mb-8"
           style={{
             backgroundColor: "var(--color-card)",
-            borderColor: "var(--color-border)",
           }}
         >
           <h1
@@ -155,10 +154,9 @@ function PersonalPreference() {
 
         {/* Instructions */}
         <div
-          className="rounded-xl p-4 mb-6 border-2"
+          className="rounded-xl p-4 mb-6"
           style={{
             backgroundColor: "var(--color-card-hover)",
-            borderColor: "var(--color-accent)",
           }}
         >
           <p className="text-sm" style={{ color: "var(--color-ink)" }}>
@@ -181,10 +179,9 @@ function PersonalPreference() {
                 key={pref.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, pref.id)}
-                className="rounded-xl p-4 cursor-move hover:scale-105 transition-transform shadow-lg border-2"
+                className="rounded-xl p-4 cursor-move hover:scale-105 transition-transform shadow-lg"
                 style={{
                   backgroundColor: pref.color,
-                  borderColor: "rgba(255, 255, 255, 0.3)",
                 }}
               >
                 <div
@@ -218,13 +215,11 @@ function PersonalPreference() {
                   key={genre.id}
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, genre.id)}
-                  className="rounded-2xl p-6 border-2 transition-all"
+                  className="rounded-2xl p-6 transition-all"
                   style={{
-                    backgroundColor: "var(--color-card)",
-                    borderColor: draggedPreference
-                      ? "var(--color-accent)"
-                      : "var(--color-border)",
-                    borderStyle: draggedPreference ? "dashed" : "solid",
+                    backgroundColor: draggedPreference
+                      ? "var(--color-card-hover)"
+                      : "var(--color-card)",
                     transform: draggedPreference ? "scale(1.05)" : "scale(1)",
                   }}
                 >
@@ -246,8 +241,8 @@ function PersonalPreference() {
 
                   {/* Drop Zone */}
                   <div
-                    className="mt-4 min-h-[80px] rounded-lg border-2 border-dashed flex items-center justify-center p-3"
-                    style={{ borderColor: "var(--color-border)" }}
+                    className="mt-4 min-h-[80px] rounded-lg flex items-center justify-center p-3"
+                    style={{ backgroundColor: "var(--color-dark-light)" }}
                   >
                     {prefOption ? (
                       <div className="w-full">
@@ -297,22 +292,20 @@ function PersonalPreference() {
           </button>
           <button
             onClick={handleReset}
-            className="py-3 px-8 rounded-lg font-medium transition-all border-2"
+            className="py-3 px-8 rounded-lg font-medium transition-all"
             style={{
               backgroundColor: "var(--color-card-hover)",
               color: "var(--color-ink)",
-              borderColor: "var(--color-border)",
             }}
           >
             🔄 Reset All
           </button>
           <button
             onClick={() => navigate("/profile")}
-            className="py-3 px-8 rounded-lg font-medium transition-all border-2"
+            className="py-3 px-8 rounded-lg font-medium transition-all"
             style={{
               backgroundColor: "var(--color-card)",
               color: "var(--color-ink)",
-              borderColor: "var(--color-border)",
             }}
           >
             ← Back to Profile
@@ -322,10 +315,9 @@ function PersonalPreference() {
         {/* Summary */}
         {Object.keys(genrePreferences).length > 0 && (
           <div
-            className="mt-8 rounded-2xl p-6 border-2"
+            className="mt-8 rounded-2xl p-6"
             style={{
               backgroundColor: "var(--color-card)",
-              borderColor: "var(--color-border)",
             }}
           >
             <h3
