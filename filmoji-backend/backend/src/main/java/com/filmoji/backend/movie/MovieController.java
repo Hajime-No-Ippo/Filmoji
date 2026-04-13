@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.filmoji.backend.service.TmdbService;
@@ -43,11 +44,10 @@ public class MovieController {
         });
     }
 
-    // Lists all movies in the database
+    // Lists movies with optional limit (default 50)
     @GetMapping()
-    public List<Movie> list() {
-        // Use a fetch-join query to include genres and avoid lazy-init errors
-        return movies.findAllWithGenres();
+    public List<Movie> list(@RequestParam(defaultValue = "50") int limit) {
+        return movies.findAllWithGenres().stream().limit(limit).toList();
     }
 
     // API GET/ Get the trailerKey 
@@ -103,5 +103,27 @@ public class MovieController {
                     return ResponseEntity.ok(response);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> getMovie(@PathVariable Integer id) {
+        return movies.findByIdWithGenres(id)
+            .map(movie -> {
+                Map<String, Object> response = new LinkedHashMap<>();
+                response.put("id",          movie.getId());
+                response.put("tmdbId",       movie.getTmdbId());
+                response.put("title",        movie.getTitle());
+                response.put("synopsis",     movie.getSynopsis() != null ? movie.getSynopsis() : "");
+                response.put("posterUrl",    movie.getPosterUrl() != null ? movie.getPosterUrl() : "");
+                response.put("trailerKey",   movie.getTrailerKey() != null ? movie.getTrailerKey() : "");
+                response.put("releaseYear",  movie.getReleaseYear());
+                response.put("rating",       movie.getRating());
+                response.put("language",     movie.getLanguage());
+                response.put("genres",       movie.getGenres() != null
+                    ? movie.getGenres().stream().map(g -> g.getName()).toList()
+                    : List.of());
+                return ResponseEntity.ok(response);
+            })
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -20,10 +20,12 @@ public class UserProfile {
     private User user;
 
     @Column(name = "quiz_answers", columnDefinition = "jsonb")
+    @org.hibernate.annotations.ColumnTransformer(write = "?::jsonb")
     private String quizAnswers = "{}";
 
     @Convert(converter = VectorConverter.class)
     @Column(name = "profile_vector", columnDefinition = "vector(384)")
+    @org.hibernate.annotations.ColumnTransformer(write = "?::vector")
     private float[] profileVector;
 
     @Column(name = "updated_at")

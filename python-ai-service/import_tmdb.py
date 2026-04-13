@@ -108,7 +108,7 @@ def insert_movie(movie):
 def main():
     fetch_genres()
 
-    pages = int(os.getenv("TMDB_PAGES", "5"))
+    pages = int(os.getenv("TMDB_PAGES", "50"))
     for page in range(1, pages + 1):  # configurable number of pages
         movies = fetch_movies(page)
         for movie in movies:

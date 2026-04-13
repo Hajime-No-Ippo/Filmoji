@@ -30,6 +30,7 @@ services:
       DB_URL: "postgresql://filmoji:filmoji_pw@db:5432/filmoji"
       DB_PASSWORD: filmoji_pw
       TMDB_API_KEY: "${TMDB_API_KEY}"
+      TMDB_PAGES: "50"
     depends_on:
       db:
         condition: service_healthy
@@ -37,7 +38,7 @@ services:
         condition: service_healthy
     networks:
       - filmoji-network
-    command: sh -c "python import_tmdb.py && uvicorn main:app --host 0.0.0.0 --port 8000"
+    command: sh -c "python import_tmdb.py && python generate_vectors.py --table movies && uvicorn main:app --host 0.0.0.0 --port 8000"
 
   backend:
     build:
@@ -48,6 +49,7 @@ services:
       - "8080:8080"
     env_file: .env
     environment:
+      FIREBASE_CREDENTIALS_PATH: "/app/firebase-service-account.json" 
       DB_URL: "jdbc:postgresql://db:5432/filmoji"
       DB_USER: "${DB_USER:-filmoji}"
       DB_PASSWORD: "${DB_PASSWORD:-filmoji_pw}"

@@ -15,6 +15,9 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     Optional<Movie> findByTmdbId(Integer tmdbId);
 
+    @Query("SELECT m FROM Movie m LEFT JOIN FETCH m.genres WHERE m.id = :id")
+    Optional<Movie> findByIdWithGenres(@Param("id") Integer id);
+
     boolean existsByTmdbId(Integer tmdbId);
 
     /**
@@ -24,11 +27,29 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     @Query(value = """
             SELECT * FROM movies
             WHERE movie_vector IS NOT NULL
+            AND rating >= 5.0
+            AND language = 'en'
             ORDER BY movie_vector <=> CAST(:queryVector AS vector)
             LIMIT :limit
             """, nativeQuery = true)
     List<Movie> findTopNByVectorSimilarity(
             @Param("queryVector") String queryVector,
+            @Param("limit") int limit
+    );
+
+    @Query(value = """
+            SELECT m.* FROM movies m
+            JOIN movie_genres mg ON mg.movie_id = m.id
+            JOIN genres g ON g.id = mg.genre_id
+            WHERE m.movie_vector IS NOT NULL
+            AND m.rating >= 5.0
+            AND g.name IN (:genres)
+            ORDER BY m.movie_vector <=> CAST(:queryVector AS vector)
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<Movie> findTopNByVectorSimilarityAndGenres(
+            @Param("queryVector") String queryVector,
+            @Param("genres") List<String> genres,
             @Param("limit") int limit
     );
 
@@ -49,6 +70,9 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     @Query(value = "SELECT * FROM movies ORDER BY RANDOM() LIMIT :limit", nativeQuery = true)
     List<Movie> findRandomMovies(@Param("limit") int limit);
+
+    @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.genres WHERE m.id IN :ids")
+    List<Movie> findByIdsWithGenres(@Param("ids") List<Integer> ids);
 
         // Fetch movies with their genres to avoid lazy-initialization issues when
         // serializing entities outside a transactional context.
