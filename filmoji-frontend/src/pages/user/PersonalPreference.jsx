@@ -7,10 +7,10 @@ import { categories } from "../../data/categories";
 
 const preferenceOptions = [
   { id: "love", text: "Absolutely loved it", color: "#27AE60" },
-  { id: "enjoy", text: "Really enjoyed it", color: "#3498DB" },
+  { id: "enjoy", text: "Like it", color: "#3498DB" },
   { id: "okay", text: "It was okay", color: "#F5C519" },
-  { id: "notfunny", text: "Not very funny", color: "#E67E22" },
-  { id: "dislike", text: "Didn't like it", color: "#E74C3C" },
+  { id: "notfunny", text: "Don't really like it", color: "#E67E22" },
+  { id: "dislike", text: "Dislike it", color: "#E74C3C" },
 ];
 
 function PersonalPreference() {
