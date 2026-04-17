@@ -26,10 +26,10 @@ public class EmbeddingService {
     private static final Logger log = LoggerFactory.getLogger(EmbeddingService.class);
     private static final int VECTOR_DIM = 384;
 
-    @Value("${huggingface.api.token}")
+    @Value("${huggingface.api.token:dev-mode}")
     private String hfToken;
 
-    @Value("${huggingface.model.url}")
+    @Value("${huggingface.model.url:https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2}")
     private String modelUrl;
 
     private final HttpClient httpClient;
@@ -46,37 +46,36 @@ public class EmbeddingService {
      * Get a 384-dimensional embedding for the given text.
      * Falls back to a pseudo-random unit vector if the API call fails.
      */
+
     public float[] getEmbedding(String text) {
         if (text == null || text.isBlank()) {
             return new float[VECTOR_DIM];
         }
 
         try {
-            String requestBody = objectMapper.writeValueAsString(Map.of(
-                    "inputs", text,
-                    "options", Map.of("wait_for_model", true)
-            ));
+            String json = objectMapper.writeValueAsString(Map.of("text", text));
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(modelUrl))
-                    .header("Authorization", "Bearer " + hfToken)
+                    .uri(URI.create("http://ai-service:8000/embed"))
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .timeout(Duration.ofSeconds(60))
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .timeout(Duration.ofSeconds(30))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
-                log.error("HuggingFace API returned {}: {}", response.statusCode(), response.body());
-                return fallbackVector(text);
+            JsonNode root = objectMapper.readTree(response.body());
+            JsonNode arr = root.get("vector");
+
+            float[] vector = new float[arr.size()];
+            for (int i = 0; i < arr.size(); i++) {
+                vector[i] = (float) arr.get(i).asDouble();
             }
 
-            return parseEmbeddingResponse(response.body());
+            return vector;
 
         } catch (IOException | InterruptedException e) {
-            log.error("Failed to call HuggingFace API: {}", e.getMessage());
-            if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+            log.error("Python embedding failed: {}", e.getMessage());
             return fallbackVector(text);
         }
     }

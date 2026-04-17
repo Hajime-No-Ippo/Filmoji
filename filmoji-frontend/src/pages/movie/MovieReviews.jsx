@@ -1,32 +1,35 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { db } from "../../../firebase";
-import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
-import { ReviewsWall } from "../../components/effects/ReviewsColumn/ReviewsColumn";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+//import { featuredMovies } from "../data/movies";
 
 function MovieReviews() {
+  const [movies, setMovies] = useState([])
+
   const [searchParams] = useSearchParams()
   const [selectedMovie, setSelectedMovie] = useState(searchParams.get('movieId'));
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
-  const [allReviews, setAllReviews] = useState([]);
-  const [allMovies, setAllMovies] = useState([]);
 
-  useEffect(() => {
-    fetch('/api/movies')
-      .then((res) => res.json())
-      .then((data) => setAllMovies(data))
-      .catch(() => {})
-  }, [])
-
-  // Fetch all recent reviews for the wall
-  useEffect(() => {
-    const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(30))
-    getDocs(q).then((snap) => {
-      setAllReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+useEffect(() => {
+  fetch('/api/movies')
+    .then(res => res.json())
+    // .then(data => {
+    //   setMovies(data)
+    //   setLoading(false)
+    // })
+    .then(data => {
+      const mapped = data.map(movie => ({
+        ...movie,
+        poster: movie.poster_url,
+        year: movie.release_year,
+        description: movie.synopsis
+      }))
+      setMovies(mapped)
     })
-  }, []);
+}, [])
 
   useEffect(() => {
     if (selectedMovie) {
@@ -70,58 +73,27 @@ function MovieReviews() {
   };
 
   const selectedMovieData = selectedMovie
-    ? allMovies.find((m) => m.id === parseInt(selectedMovie))
+    ? movies.find((m) => m.id === parseInt(selectedMovie))
     : null;
-  const enrichedReviews = allReviews.map((r) => ({
-    ...r,
-    movieTitle: allMovies.find((m) => m.id === r.movieId)?.title,
-  }))
 
   return (
     <div
       style={{ backgroundColor: "var(--color-dark)" }}
-      className="min-h-screen pb-12"
+      className="min-h-screen pt-24 pb-12 px-4"
     >
-      {/* ── Reviews wall hero ── */}
-      {allReviews.length > 0 && (
-        <div className="relative pt-24 pb-16 px-4 overflow-hidden">
-          <div className="text-center mb-10">
-            <h1 style={{ color: 'var(--color-ink)' }} className="text-4xl md:text-5xl font-bold mb-3">
-              What People Are Saying
-            </h1>
-            <p style={{ color: 'var(--color-muted)' }} className="text-lg">
-              Real reviews from Filmoji users
-            </p>
-          </div>
-          <div className="relative">
-            <ReviewsWall reviews={enrichedReviews} className="max-h-[480px]" />
-            {/* fade in top */}
-            <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
-              style={{ background: 'linear-gradient(to bottom, var(--color-dark) 0%, transparent 100%)' }}
-            />
-            {/* fade out bottom */}
-            <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-              style={{ background: 'linear-gradient(to bottom, transparent 0%, var(--color-dark) 100%)' }}
-            />
-          </div>
-        </div>
-      )}
-
-      <div className="max-w-5xl mx-auto px-4 mt-80">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
           <h1
             style={{ color: "var(--color-ink)" }}
             className="text-4xl md:text-5xl font-bold mb-4"
           >
-            Check by Movies
+            Movie Reviews
           </h1>
           <p style={{ color: "var(--color-muted)" }} className="text-lg">
-            See other users' reviews and ratings for your favorite movies, or find new ones to watch based on their feedback!
+            See what other users think about movies
           </p>
         </div>
-
-        <section className="description"></section>
 
         {/* Movie Selection */}
         <div
@@ -150,7 +122,7 @@ function MovieReviews() {
             <option value="" disabled>
               -- Please select a movie --
             </option>
-            {allMovies.map((movie) => (
+            {movies.map((movie) => (
               <option
                 key={movie.id}
                 value={movie.id}
@@ -159,7 +131,7 @@ function MovieReviews() {
                   color: "var(--color-ink)",
                 }}
               >
-                {movie.title} ({movie.releaseYear}) - IMDb: {movie.rating}
+                {movie.title} ({movie.release_year}) - IMDb: {movie.rating}
               </option>
             ))}
           </select>
@@ -176,7 +148,7 @@ function MovieReviews() {
           >
             <div className="flex flex-col md:flex-row gap-6">
               <img
-                src={selectedMovieData.posterUrl}
+                src={selectedMovieData.poster}
                 alt={selectedMovieData.title}
                 className="w-full md:w-48 h-72 object-cover rounded-lg"
               />
@@ -188,8 +160,8 @@ function MovieReviews() {
                   {selectedMovieData.title}
                 </h2>
                 <p style={{ color: "var(--color-muted)" }} className="mb-4">
-                  {selectedMovieData.releaseYear} •{" "}
-                  {Array.isArray(selectedMovieData.genres) ? selectedMovieData.genres.join(", ") : selectedMovieData.genres}
+                  {selectedMovieData.year} •{" "}
+                  {selectedMovieData.genres.join(", ")}
                 </p>
                 <div className="flex items-center space-x-6">
                   <div>

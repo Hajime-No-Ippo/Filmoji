@@ -1,123 +1,73 @@
-import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { useMoviesTrailer } from "../../hooks/useMoviesAPIs";
-import { ContainerScroll } from "../../components/effects/ContainerScroll/ContainerScroll";
-import ReviewsColumn from "../../components/effects/ReviewsColumn/ReviewsColumn";
-import { db } from "../../../firebase";
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  limit,
-  getDocs,
-  addDoc,
-  serverTimestamp,
-} from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import FeaturedMovies from "../../components/movie/FeaturedMovies";
-import { useWatchlist } from "../../components/watchlist/WatchlistContext";
+import { useState, useEffect } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+// import { featuredMovies } from '../data/movies'
+import { useMoviesWithPosters, useMoviesTrailer } from '../../hooks/useMoviesAPIs'
+import { ContainerScroll } from '../../components/effects/ContainerScroll/ContainerScroll'
+import ReviewSnippetCard from '../../components/movie/ReviewSnippetCard'
+import { db } from '../../../firebase'
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore'
 
 function MovieDetail() {
-  const { id } = useParams();
-  const [movie, setMovie] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { id } = useParams()
+  const [movies, setMovies] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const { user, isInWatchlist, toggleWatchlist } = useWatchlist();
-  const inWatchlist = isInWatchlist(movie?.id);
+useEffect(() => {
+  fetch('/api/movies')
+    .then(res => res.json())
+    // .then(data => {
+    //   setMovies(data)
+    //   setLoading(false)
+    // })
+    .then(data => {
+      const mapped = data.map(movie => ({
+        ...movie,
+        poster: movie.posterUrl || movie.poster || movie.poster_url,
+        year: movie.releaseYear || movie.release_year,
+        description: movie.synopsis
+      }))
+      setMovies(mapped)
+    })
+}, [])
+  // const { movies, loading } = useMoviesWithPosters(featuredMovies)
+  const movie = movies.find((m) => m.id === parseInt(id))
+  //   ? featuredMovies.find((m) => m.id === parseInt(id))
+  //   : movies.find((m) => m.id === parseInt(id))
+  const { trailerKey: fetchedTrailerKey, loading: trailerLoading } = useMoviesTrailer(movie?.id)
+  const trailerKey = fetchedTrailerKey ?? 'dQw4w9WgXcQ' // TODO: remove fallback once backend returns trailerKey
+  const navigate = useNavigate()
 
+  const [reviews, setReviews] = useState([])
   useEffect(() => {
-    fetch(`/api/movies/${id}`)
-      .then((res) => res.json())
-      .then((data) => setMovie(data))
-      .catch(() => setMovie(null))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  const { trailerKey: fetchedTrailerKey, loading: trailerLoading } =
-    useMoviesTrailer(movie?.tmdbId);
-  const trailerKey = fetchedTrailerKey ?? null;
-  const navigate = useNavigate();
-
-  const [reviews, setReviews] = useState([]);
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  const currentUser = getAuth().currentUser;
-
-  const handleSubmitReview = async (e) => {
-    e.preventDefault();
-    if (!currentUser) return;
-    if (rating < 1 || rating > 10 || !comment.trim()) return;
-    setSubmitting(true);
-    try {
-      await addDoc(collection(db, "reviews"), {
-        movieId: movie.id,
-        userId: currentUser.uid,
-        userEmail: currentUser.email,
-        rating: parseInt(rating),
-        comment: comment.trim(),
-        createdAt: serverTimestamp(),
-      });
-      setRating(0);
-      setComment("");
-      // refresh snippets
-      const q = query(
-        collection(db, "reviews"),
-        where("movieId", "==", movie.id),
-        orderBy("createdAt", "desc"),
-        limit(3),
-      );
-      const snap = await getDocs(q);
-      setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-  useEffect(() => {
-    if (!movie?.id) return;
+    if (!movie?.id) return
     const q = query(
-      collection(db, "reviews"),
-      where("movieId", "==", movie.id),
-      orderBy("createdAt", "desc"),
-      limit(3),
-    );
-    getDocs(q).then((snap) =>
-      setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
-    );
-  }, [movie?.id]);
+      collection(db, 'reviews'),
+      where('movieId', '==', movie.id),
+      orderBy('createdAt', 'desc'),
+      limit(3)
+    )
+    getDocs(q).then((snap) => setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() }))))
+  }, [movie?.id])
 
   if (!movie) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
         <div className="text-center">
           <p className="text-xl mb-4">Movie not found.</p>
-          <Link to="/" className="accent-link">
-            ← Back to Home
-          </Link>
+          <Link to="/" className="accent-link">← Back to Home</Link>
         </div>
       </div>
-    );
+    )
   }
 
   const titleComponent = (
     <div className="pt-24 pb-4 px-4">
-      <Link
-        to="/"
-        className="nav-link flex items-center gap-2 text-sm mb-6 inline-block"
-      >
+      <Link to="/" className="nav-link flex items-center gap-2 text-sm mb-6 inline-block">
         ← Back
       </Link>
       <div className="flex flex-wrap justify-center gap-2 mb-4">
-        {(Array.isArray(movie.genres)
-          ? movie.genres
-          : (movie.genres?.split(",") ?? [])
-        ).map((g) => (
-          <span
-            key={g}
-            className="text-xs px-3 py-1 rounded-full border border-accent text-accent uppercase tracking-widest"
-          >
+        {(movie.genres || "").split(",").map((g) => (
+          <span key={g} className="text-xs px-3 py-1 rounded-full border border-accent text-accent uppercase tracking-widest">
             {g}
           </span>
         ))}
@@ -133,32 +83,8 @@ function MovieDetail() {
           <span className="text-muted">/10 IMDb</span>
         </div>
       </div>
-
-      {user ? (
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => toggleWatchlist(movie.id)}
-            className="rounded-lg px-5 py-2 text-sm font-semibold transition"
-            style={
-              inWatchlist
-                ? {
-                    backgroundColor: "var(--color-mood-blue)",
-                    color: "var(--color-card)",
-                  }
-                : {
-                    backgroundColor: "var(--color-card)",
-                    color: "var(--color-mood-blue)",
-                    border: "1px solid var(--color-mood-blue)",
-                  }
-            }
-          >
-            {inWatchlist ? "In Watchlist" : "+ Add to Watchlist"}
-          </button>
-        </div>
-      ) : null}
     </div>
-  );
+  )
 
   return (
     <div className="bg-dark min-h-screen">
@@ -166,6 +92,7 @@ function MovieDetail() {
       <ContainerScroll titleComponent={titleComponent}>
         {/* Card content — trailer full size, links overlaid at bottom */}
         <div className="relative h-full w-full overflow-hidden rounded-xl bg-black">
+
           {/* Trailer — full size */}
           {trailerLoading ? (
             <div className="w-full h-full flex items-center justify-center text-white/40 text-sm">
@@ -189,96 +116,47 @@ function MovieDetail() {
       {/* UpComing functions, we will render reviews and rating details below the pad, also do the options */}
 
       <div className="pt-24 pb-20 px-6 min-h-screen">
-        {/* Rating and Reviews Sections */}
-        <section id="reviews" className="section">
-          <h3 className="text-3xl font-bold mb-6">
-            {movie.title} Ratings & Reviews
-          </h3>
+        
 
-          {/* Write a review form */}
-          {currentUser ? (
-            <form
-              onSubmit={handleSubmitReview}
-              className="card-base p-5 mb-6 flex flex-col gap-3"
+          {/* Links overlay at bottom */}
+          <div className="w-full relative">
+            <Link
+              to="/reviews"
+              className="flex-1 text-center py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors no-underline"
             >
-              <p className="text-sm font-semibold text-ink">Write a Review</p>
-              <div className="flex items-center gap-3">
-                <label className="text-sm text-muted">Rating</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={rating || ""}
-                  onChange={(e) => setRating(e.target.value)}
-                  placeholder="1–10"
-                  className="input-field w-20"
-                  required
-                />
+              Read Reviews
+            </Link>
+            <Link
+              to="/"
+              className="flex-1 text-center py-2 rounded-lg border border-white/20 hover:bg-white/10 text-white text-sm transition-colors no-underline"
+            >
+              More Movies
+            </Link> 
+          </div>
+          
+
+          {/* Rating and Reviews Sections */}
+          <section id="reviews" className="section">
+            <h3 className="text-3xl font-bold mb-6">{movie.title} Ratings & Reviews</h3>
+            {reviews.length === 0 ? (
+              <p className="text-muted text-sm">No reviews yet.</p>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {reviews.map((review) => (
+                  <ReviewSnippetCard key={review.id} review={review} movieId={movie.id} />
+                ))}
+                <button
+                  onClick={() => navigate(`/reviews?movieId=${movie.id}`)}
+                  className="text-sm text-accent hover:text-accent-hover text-left mt-1"
+                >
+                  See all reviews →
+                </button>
               </div>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Share your thoughts..."
-                rows={3}
-                className="input-field resize-none"
-                required
-              />
-              <button
-                type="submit"
-                disabled={submitting}
-                className="btn-primary px-6 self-start"
-              >
-                {submitting ? "Submitting..." : "Submit Review"}
-              </button>
-            </form>
-          ) : (
-            <p className="text-sm text-muted mb-6">
-              <Link to="/login" className="accent-link">
-                Sign in
-              </Link>{" "}
-              to leave a review.
-            </p>
-          )}
-          {reviews.length === 0 ? (
-            <p className="text-muted text-sm">No reviews yet. Be the first!</p>
-          ) : (
-            <div>
-              <div className="relative">
-                <ReviewsColumn
-                  reviews={reviews}
-                  duration={20}
-                  className="max-h-[520px]"
-                />
-                {/* fade in top */}
-                <div
-                  className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
-                  style={{
-                    background:
-                      "linear-gradient(to bottom, var(--color-dark) 0%, transparent 100%)",
-                  }}
-                />
-                {/* fade out bottom */}
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-                  style={{
-                    background:
-                      "linear-gradient(to bottom, transparent 0%, var(--color-dark) 100%)",
-                  }}
-                />
-              </div>
-              <button
-                onClick={() => navigate(`/reviews?movieId=${movie.id}`)}
-                className="text-sm text-accent hover:text-accent-hover text-left mt-4 block"
-              >
-                See all reviews →
-              </button>
-            </div>
-          )}
-        </section>
-      </div>
-      <FeaturedMovies />
+            )}
+          </section>
+        </div>
     </div>
-  );
+  )
 }
 
-export default MovieDetail;
+export default MovieDetail

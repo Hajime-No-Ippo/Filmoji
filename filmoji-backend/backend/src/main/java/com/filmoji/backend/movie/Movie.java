@@ -1,9 +1,14 @@
 package com.filmoji.backend.movie;
 
+import com.filmoji.backend.movie.Genre;
+import com.filmoji.backend.movie.GenreRepository;
 import com.filmoji.backend.converter.VectorConverter;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Entity
 @Table(name = "movies")
@@ -23,8 +28,6 @@ public class Movie {
     private String synopsis;
 
     // Stored as comma-separated string, e.g. "Action,Thriller"
-    @Column(name = "genres", columnDefinition = "TEXT")
-    private String genres;
 
     @Column(name = "poster_url", length = 500)
     private String posterUrl;
@@ -48,6 +51,14 @@ public class Movie {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @ManyToMany
+    @JoinTable(
+            name = "movie_genres",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+
+    private Set<Genre> genres = new HashSet<>();
     // ── Getters & Setters ──
 
     public Integer getId() { return id; }
@@ -62,8 +73,8 @@ public class Movie {
     public String getSynopsis() { return synopsis; }
     public void setSynopsis(String synopsis) { this.synopsis = synopsis; }
 
-    public String getGenres() { return genres; }
-    public void setGenres(String genres) { this.genres = genres; }
+    public Set<Genre> getGenres() { return genres; }
+    public void setGenres(Set<Genre> genres) { this.genres = genres; }
 
     public String getPosterUrl() { return posterUrl; }
     public void setPosterUrl(String posterUrl) { this.posterUrl = posterUrl; }

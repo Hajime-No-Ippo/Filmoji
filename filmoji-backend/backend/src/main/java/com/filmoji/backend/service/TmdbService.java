@@ -18,6 +18,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.PostConstruct;
+
+import com.filmoji.backend.movie.Genre;
+import com.filmoji.backend.movie.GenreRepository;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class TmdbService {
@@ -36,11 +44,22 @@ public class TmdbService {
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    public TmdbService() {
+    @Autowired
+    private GenreRepository genreRepository;
+
+    public TmdbService(GenreRepository genreRepository) {
+        this.genreRepository = genreRepository;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
                 .build();
         this.objectMapper = new ObjectMapper();
+    }
+
+    @PostConstruct
+    public void validateConfig() {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException("TMDB API key is not configured. Set TMDB_API_KEY environment variable or tmdb.api.key property.");
+        }
     }
 
     public Movie enrichMovieFromTmdb(Movie movie) {
@@ -70,9 +89,21 @@ public class TmdbService {
 
             JsonNode genresNode = details.path("genres");
             if (genresNode.isArray()) {
-                List<String> genres = new ArrayList<>();
-                genresNode.forEach(g -> genres.add(g.path("name").asText()));
-                movie.setGenres(String.join(",", genres));
+                Set<Genre> genres = new HashSet<>();
+
+                for (JsonNode g : genresNode) {
+                    int Id = g.path("id").asInt();
+                    String name = g.path("name").asText();
+                    Genre genre = genreRepository.findById(Id).orElseGet(() -> {
+                        Genre newGenre = new Genre();
+                        newGenre.setId(Id);
+                        newGenre.setName(name);
+                        return genreRepository.save(newGenre);
+                    });
+                    genres.add(genre);
+                }
+                movie.setGenres(genres);
+                            
             }
 
             String trailerKey = fetchTrailerKey(movie.getTmdbId());

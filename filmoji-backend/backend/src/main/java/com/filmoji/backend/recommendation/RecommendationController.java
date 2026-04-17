@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.filmoji.backend.movie.Genre;
 
 import java.util.*;
 
@@ -43,19 +44,7 @@ public class RecommendationController {
             this.userProfileService = userProfileService;
             this.tmdbService        = tmdbService;
         }
-
-        public static class RecommendationResult {
-            private final Movie movie;
-            private final String whyRecommended;
-        }
-        ```
-        
-     * These should be the attributes of what we have 🔼 in the recommend entities
-
-            - call the recommendationService
-            - ask it to compute recommendations for this user
-            - based on the selected emojis
-            - and return 3 results
+     * These should be the attributes of what we have 🔼
      */
     @PostMapping
     public ResponseEntity<List<Map<String, Object>>> getRecommendations(
@@ -89,7 +78,12 @@ public class RecommendationController {
         map.put("tmdbId",         movie.getTmdbId());
         map.put("title",          movie.getTitle());
         map.put("synopsis",       movie.getSynopsis() != null ? movie.getSynopsis() : "");
-        map.put("genres",         movie.getGenres() != null ? List.of(movie.getGenres().split(",")) : List.of());
+        map.put("genres", 
+            movie.getGenres() != null 
+            ? movie.getGenres().stream()
+                .map(Genre::getName)
+                .toList()
+            : List.of());
         map.put("posterUrl",      movie.getPosterUrl() != null ? movie.getPosterUrl() : "");
         map.put("trailerKey",     movie.getTrailerKey() != null ? movie.getTrailerKey() : "");
         map.put("releaseYear",    movie.getReleaseYear());

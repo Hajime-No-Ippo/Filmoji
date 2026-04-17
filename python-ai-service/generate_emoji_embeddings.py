@@ -1,57 +1,57 @@
 import psycopg2
 from sentence_transformers import SentenceTransformer
-import os
+from sklearn.preprocessing import normalize
 
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 conn = psycopg2.connect(
-    dbname="filmoji_db",
+    dbname="filmoji",
     user="postgres",
-    password=os.getenv("DB_PASSWORD"),
-    host="localhost"
+    password="postgres_password",
+    host="db",
+    port=5432
 )
 
 cur = conn.cursor()
 
-
-def generate_emoji_embeddings():
+def generate_movie_embeddings():
 
     cur.execute("""
-        SELECT id, emoji, name, description
-        FROM emojis
+        SELECT id, title, synopsis
+        FROM movies
     """)
 
-    emojis = cur.fetchall()
+    movies = cur.fetchall()
 
     texts = []
     ids = []
 
-    for row in emojis:
-        emoji_id = row[0]
-        emoji_char = row[1]
-        name = row[2]
-        description = row[3] or ""
+    for row in movies:
+        movie_id = row[0]
+        title = row[1]
+        synopsis = row[2] or ""
 
-        text = f"{emoji_char} {name} {description}"
+        text = f"{title} {synopsis}"
 
         texts.append(text)
-        ids.append(emoji_id)
+        ids.append(movie_id)
 
-    # Generate all embeddings at once
+    # Generate embeddings AFTER texts are ready
     vectors = model.encode(texts)
 
-    # Update database
+    # Normalize (important for cosine similarity)
+    vectors = normalize(vectors)
+
     for i in range(len(ids)):
         cur.execute("""
-            UPDATE emojis
-            SET embedding = %s
+            UPDATE movies
+            SET movie_vector = %s::vector
             WHERE id = %s
         """, (vectors[i].tolist(), ids[i]))
 
     conn.commit()
-
-    print("Emoji embeddings generated successfully")
+    print("Movie embeddings generated successfully")
 
 
 if __name__ == "__main__":
-    generate_emoji_embeddings()
+    generate_movie_embeddings()

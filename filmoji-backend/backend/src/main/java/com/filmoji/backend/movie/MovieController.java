@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,29 +42,8 @@ public class MovieController {
     // Lists all movies in the database
     @GetMapping()
     public List<Movie> list() {
-        return movies.findAll();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Movie> getById(@PathVariable Integer id) {
-        return movies.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // DELETE /api/movies/{id} — remove a movie from the database
-    /**
-     * 
-     * @param id movie.id
-     * @return // StateCode: 204
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        if (!movies.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        movies.deleteById(id);
-        return ResponseEntity.noContent().build(); // 204
+        // Use a fetch-join query to include genres and avoid lazy-init errors
+        return movies.findAllWithGenres();
     }
 
     // API GET/ Get the trailerKey 
@@ -101,19 +79,6 @@ public class MovieController {
     @GetMapping("/{id}/trailer")
     public ResponseEntity<Map<String, Object>> getTrailerKey(@PathVariable Integer id) {
         return movies.findById(id)
-                .map(movie -> {
-                    Map<String, Object> response = new LinkedHashMap<>();
-                    response.put("id", movie.getId());
-                    response.put("tmdbId", movie.getTmdbId());
-                    response.put("trailerKey", movie.getTrailerKey());
-                    return ResponseEntity.ok(response);
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/tmdb/{tmdbId}/trailer")
-    public ResponseEntity<Map<String, Object>> getTrailerKeyByTmdbId(@PathVariable Integer tmdbId) {
-        return movies.findByTmdbId(tmdbId)
                 .map(movie -> {
                     Map<String, Object> response = new LinkedHashMap<>();
                     response.put("id", movie.getId());

@@ -4,16 +4,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository // The file which contacted with DB
+@Repository
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     Optional<Movie> findByTmdbId(Integer tmdbId);
@@ -21,7 +18,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     boolean existsByTmdbId(Integer tmdbId);
 
     /**
-     * Vector similarity search using pgvector cosine distance operator (<=>). 
+     * Vector similarity search using pgvector cosine distance operator (<=>).
      * Returns the N closest movies to the given query vector.
      */
     @Query(value = """
@@ -37,13 +34,13 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     /**
      * Check whether the Movie are 
-     * @return The movie without storing vectors (COMPLEXITY)
+     * @return
      */
     @Query("SELECT m FROM Movie m WHERE m.movieVector IS NULL")
     List<Movie> findMoviesWithoutVector();
 
-    @Modifying // Updates
-    @Transactional // Updates
+    @Modifying
+    @Transactional
     @Query(value = "UPDATE movies SET movie_vector = CAST(:vector AS vector), poster_url = :posterUrl, trailer_key = :trailerKey WHERE id = :id", nativeQuery = true)
     void updateMovieVectorAndMedia(@Param("id") Integer id,
                                    @Param("vector") String vector,
@@ -52,4 +49,9 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     @Query(value = "SELECT * FROM movies ORDER BY RANDOM() LIMIT :limit", nativeQuery = true)
     List<Movie> findRandomMovies(@Param("limit") int limit);
+
+        // Fetch movies with their genres to avoid lazy-initialization issues when
+        // serializing entities outside a transactional context.
+        @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.genres")
+        List<Movie> findAllWithGenres();
 }

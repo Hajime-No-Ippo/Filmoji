@@ -1,0 +1,8 @@
+backend/target
+backend/.git
+backend/.gitignore
+backend/node_modules
+backend/.env
+backend/.env.local
+*.md
+.DS_Store

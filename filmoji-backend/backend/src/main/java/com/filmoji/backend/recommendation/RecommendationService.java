@@ -9,6 +9,7 @@ import com.filmoji.backend.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import com.filmoji.backend.movie.Genre;
 
 import java.util.*;
 
@@ -218,8 +219,7 @@ public class RecommendationService {
     }
 
     private Movie enrichIfNeeded(Movie movie) {
-        if (movie.getPosterUrl() == null || movie.getPosterUrl().isBlank() ||
-            movie.getTrailerKey() == null || movie.getTrailerKey().isBlank()) {
+        if (movie.getPosterUrl() == null || movie.getTrailerKey() == null) {
             try {
                 return tmdbService.enrichMovieFromTmdb(movie);
             } catch (Exception e) {
@@ -230,9 +230,9 @@ public class RecommendationService {
     }
 
     private String buildWhyRecommended(Movie movie, String emojiString, String primaryEmotion) {
-        String genres = movie.getGenres();
-        String genreText = (genres != null && !genres.isEmpty())
-                ? genres.split(",")[0].trim().toLowerCase() : "this";
+        Set<Genre> genres = movie.getGenres();
+        String genreText = (!genres.isEmpty())
+                ? genres.iterator().next().getName().toLowerCase() : "this";
         return String.format("We picked this because you're feeling %s and it's a great %s pick %s",
                 primaryEmotion, genreText, emojiString.substring(0, Math.min(3, emojiString.length())));
     }
