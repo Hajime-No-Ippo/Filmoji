@@ -18,7 +18,7 @@ import java.util.*;
  * Returns top 3 movie recommendations.
  */
 @RestController
-@RequestMapping("/api/recommendations")
+@RequestMapping("/recommendations")
 public class RecommendationController {
 
     private static final Logger log = LoggerFactory.getLogger(RecommendationController.class);
