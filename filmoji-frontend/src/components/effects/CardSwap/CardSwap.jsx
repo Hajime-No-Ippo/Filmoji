@@ -26,15 +26,17 @@ const placeNow = (el, slot, skew) =>
     force3D: true
   });
 
+  // Change the first cards position
+
 const CardSwap = ({
   width = 500,
   height = 400,
   cardDistance = 60,
-  verticalDistance = 70,
+  verticalDistance = 90,
   delay = 5000,
   pauseOnHover = false,
   onCardClick,
-  skewAmount = 6,
+  skewAmount = 9,
   easing = 'elastic',
   children
 }) => {

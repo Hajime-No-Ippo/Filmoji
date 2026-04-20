@@ -32,7 +32,8 @@ function DescriptionBrick() {
           <CardSwap cardDistance={60} verticalDistance={70} delay={5000} pauseOnHover={false}>
             <Card>
               {/* This is how we change thing in cards */}
-              <p>Test</p>
+              {/* <p>Test</p> */}
+              <img src="https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"/>
             </Card>
             <Card />
             <Card />
