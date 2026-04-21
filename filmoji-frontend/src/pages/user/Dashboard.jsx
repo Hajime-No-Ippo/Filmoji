@@ -3,14 +3,26 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../firebase";
 import { useNavigate } from "react-router-dom";
 import MoodInput from "../../components/recommendation/MoodInput";
+import { authFetch } from "../../utils/api";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        try {
+          const res = await authFetch('/api/users/me');
+          if (res.ok) {
+            const data = await res.json();
+            if (!data.onboardingComplete) navigate('/onboarding');
+          }
+        } catch (_) {
+          // non-blocking
+        }
+      }
     });
     return () => unsubscribe();
   }, []);

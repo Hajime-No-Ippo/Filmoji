@@ -8,7 +8,7 @@ function MovieCard({ movie }) {
 // }
   return (
     <Link
-      to={`/movie/${movie.tmdb_id}`}
+      to={`/movie/${movie.id}`}
       className="group block no-underline"
     >
       <div className="overflow-hidden rounded-2xl border border-border bg-card">
@@ -28,9 +28,9 @@ function MovieCard({ movie }) {
         <h3 className="text-sm font-semibold leading-snug text-ink">
           {movie.title}
         </h3>
-        {movie.release_year && (
+        {movie.year && (
           <p className="mt-1 text-xs text-muted">
-            {movie.release_year}
+            {movie.year}
           </p>
         )}
       </div>

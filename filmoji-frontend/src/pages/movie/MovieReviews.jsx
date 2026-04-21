@@ -1,17 +1,26 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { db } from "../../../firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+import { ReviewsWall } from "../../components/effects/ReviewsColumn/ReviewsColumn";
 //import { featuredMovies } from "../data/movies";
 
 function MovieReviews() {
   const [movies, setMovies] = useState([])
+  const [allReviews, setAllReviews] = useState([])
 
   const [searchParams] = useSearchParams()
   const [selectedMovie, setSelectedMovie] = useState(searchParams.get('movieId'));
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
+
+useEffect(() => {
+  const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(30))
+  getDocs(q).then(snap => {
+    setAllReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+  }).catch(() => {})
+}, [])
 
 useEffect(() => {
   fetch('/api/movies')
@@ -81,6 +90,12 @@ useEffect(() => {
       style={{ backgroundColor: "var(--color-dark)" }}
       className="min-h-screen pt-24 pb-12 px-4"
     >
+      {allReviews.length > 0 && (
+        <section className="mb-12">
+          <ReviewsWall reviews={allReviews} className="h-[32rem]" />
+        </section>
+      )}
+
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -161,7 +176,7 @@ useEffect(() => {
                 </h2>
                 <p style={{ color: "var(--color-muted)" }} className="mb-4">
                   {selectedMovieData.year} •{" "}
-                  {selectedMovieData.genres.join(", ")}
+                  {(selectedMovieData.genres || []).map(g => g?.name ?? g).join(', ')}
                 </p>
                 <div className="flex items-center space-x-6">
                   <div>

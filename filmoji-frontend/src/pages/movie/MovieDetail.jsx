@@ -34,7 +34,7 @@ useEffect(() => {
   //   ? featuredMovies.find((m) => m.id === parseInt(id))
   //   : movies.find((m) => m.id === parseInt(id))
   const { trailerKey: fetchedTrailerKey, loading: trailerLoading } = useMoviesTrailer(movie?.id)
-  const trailerKey = fetchedTrailerKey ?? 'dQw4w9WgXcQ' // TODO: remove fallback once backend returns trailerKey
+  const trailerKey = fetchedTrailerKey
   const navigate = useNavigate()
 
   const [reviews, setReviews] = useState([])
@@ -66,9 +66,9 @@ useEffect(() => {
         ← Back
       </Link>
       <div className="flex flex-wrap justify-center gap-2 mb-4">
-        {(movie.genres || "").split(",").map((g) => (
-          <span key={g} className="text-xs px-3 py-1 rounded-full border border-accent text-accent uppercase tracking-widest">
-            {g}
+        {(Array.isArray(movie.genres) ? movie.genres : (movie.genres || "").split(",")).map((g) => (
+          <span key={g?.id ?? g} className="text-xs px-3 py-1 rounded-full border border-accent text-accent uppercase tracking-widest">
+            {g?.name ?? g}
           </span>
         ))}
       </div>

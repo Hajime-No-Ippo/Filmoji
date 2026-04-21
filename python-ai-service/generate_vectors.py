@@ -12,14 +12,14 @@ def get_db_connection_from_env():
     if db_url:
         parsed = urllib.parse.urlparse(db_url)
         dbname = parsed.path.lstrip("/") or os.getenv("DB_NAME", "filmoji")
-        user = parsed.username or os.getenv("DB_USER", "postgres")
-        password = parsed.password or os.getenv("DB_PASSWORD", "postgres_password")
+        user = parsed.username or os.getenv("DB_USER", "filmoji")
+        password = parsed.password or os.getenv("DB_PASSWORD", "filmoji_pw")
         host = parsed.hostname or os.getenv("DB_HOST", "localhost")
         port = parsed.port or int(os.getenv("DB_PORT", 5432))
     else:
         dbname = os.getenv("DB_NAME", "filmoji")
-        user = os.getenv("DB_USER", "postgres")
-        password = os.getenv("DB_PASSWORD", "postgres_password")
+        user = os.getenv("DB_USER", "filmoji")
+        password = os.getenv("DB_PASSWORD", "filmoji_pw")
         host = os.getenv("DB_HOST", "db")
         port = int(os.getenv("DB_PORT", 5432))
 

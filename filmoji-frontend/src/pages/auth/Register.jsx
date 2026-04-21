@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase";
 import Particles from "../../components/effects/Particles/Particles" 
@@ -11,8 +11,6 @@ function Register() {
   const [confirm, setConfirm] = useState('')
   const [accepted, setAccepted] = useState(false)
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/dashboard'
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +22,7 @@ function Register() {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      navigate(redirect)
+      navigate('/onboarding')
     } catch (error) {
       alert(error.message);
     }

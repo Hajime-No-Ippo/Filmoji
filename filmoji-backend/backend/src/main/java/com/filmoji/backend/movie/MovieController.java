@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,18 +14,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.filmoji.backend.service.TmdbService;
+
 @RestController
-/**
- * Mulitiple mapping available
- * @apiNote: Two class-level endpoint remain works same here -> "/movies", "/api/movies" 
- */
 @RequestMapping({"/movies", "/api/movies"})
 public class MovieController {
 
-    private final MovieRepository movies;
+    private static final Logger log = LoggerFactory.getLogger(MovieController.class);
 
-    public MovieController(MovieRepository movies) {
+    private final MovieRepository movies;
+    private final TmdbService tmdbService;
+
+    public MovieController(MovieRepository movies, TmdbService tmdbService) {
         this.movies = movies;
+        this.tmdbService = tmdbService;
     }
 
     // Quick test endpoint: adds one movie if it's not already there
@@ -80,10 +84,22 @@ public class MovieController {
     public ResponseEntity<Map<String, Object>> getTrailerKey(@PathVariable Integer id) {
         return movies.findById(id)
                 .map(movie -> {
+                    String trailerKey = movie.getTrailerKey();
+                    if (trailerKey == null || trailerKey.isBlank()) {
+                        try {
+                            trailerKey = tmdbService.fetchTrailerKey(movie.getTmdbId());
+                            if (trailerKey != null) {
+                                movie.setTrailerKey(trailerKey);
+                                movies.save(movie);
+                            }
+                        } catch (Exception e) {
+                            log.warn("Could not fetch trailer for movie {}: {}", movie.getTmdbId(), e.getMessage());
+                        }
+                    }
                     Map<String, Object> response = new LinkedHashMap<>();
                     response.put("id", movie.getId());
                     response.put("tmdbId", movie.getTmdbId());
-                    response.put("trailerKey", movie.getTrailerKey());
+                    response.put("trailerKey", trailerKey);
                     return ResponseEntity.ok(response);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());

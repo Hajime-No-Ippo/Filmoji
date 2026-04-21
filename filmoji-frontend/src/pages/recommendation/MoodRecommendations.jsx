@@ -50,7 +50,7 @@ export default function MoodRecommendations({ emoji = '😊', color = '#F5C519',
   }, [propMovies])
 
   const selected = movies[selectedIdx]
-  const { trailerKey, loading: trailerLoading } = useMoviesTrailer(selected?.tmdbId)
+  const { trailerKey, loading: trailerLoading } = useMoviesTrailer(selected?.id)
 
   return (
     <div className="min-h-screen bg-white flex items-stretch">
@@ -121,8 +121,8 @@ export default function MoodRecommendations({ emoji = '😊', color = '#F5C519',
           <span className="text-xs text-ink/40">{selected.year}</span>
           <span className="text-xs font-semibold text-yellow-500">★ {selected.rating}</span>
           {(Array.isArray(selected.genres) ? selected.genres : selected.genres?.split(',') ?? []).map((g) => (
-            <span key={g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-ink/50">
-              {g}
+            <span key={g?.id ?? g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-ink/50">
+              {g?.name ?? g}
             </span>
           ))}
         </div>

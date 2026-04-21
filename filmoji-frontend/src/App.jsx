@@ -18,6 +18,7 @@ import MovieDetail from "./pages/movie/MovieDetail";
 import Recommendations from "./pages/recommendation/Recommendations";
 import EmojiRecommendations from "./pages/recommendation/EmojiRecommendations";
 import PersonalPreference from "./pages/user/PersonalPreference";
+import Onboarding from "./pages/user/Onboarding";
 import ProtectedRoute from "./components/functional/ProtectedRoute";
 import ScrollToTop from "./components/functional/ScrollToTop";
 import { WatchlistProvider } from "./components/watchlist/WatchlistContext";
@@ -82,6 +83,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PersonalPreference />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/onboarding"
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
                 </ProtectedRoute>
               }
             />

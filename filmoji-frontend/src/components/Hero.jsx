@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useScroll, useTransform, motion, AnimatePresence } from 'motion/react'
 import { Link } from 'react-router-dom'
+import { useMoviesTrailer } from '../hooks/useMoviesAPIs'
 // import { featuredMovies } from '../data/movies'
 import WaveDivider from './effects/WaveDivider/WaveDivider'
 
@@ -89,8 +90,7 @@ function Hero({ movies }) {
   const { scrollY } = useScroll()
   const [expanded, setExpanded] = useState(null)   // { emoji, mood, color, rect }
   const selected = movies[0] || {}
-  const trailerKey = 'S_Pd2pGkq54' // TODO: remove fallback once backend returns trailerKey
-  const trailerLoading = false
+  const { trailerKey, loading: trailerLoading } = useMoviesTrailer(selected?.id)
 
   // Parallax activates once the emoji section scrolls into view (~1 viewport down)
   const y0 = useTransform(scrollY, [400, 1600], [0,  -70])
@@ -241,9 +241,9 @@ function Hero({ movies }) {
                 <div className="flex items-center gap-3 mb-4">
                   <span className="text-xs text-white/40">{selected.year}</span>
                   <span className="text-xs font-semibold text-yellow-500">★ {selected.rating}</span>
-                  {(selected.genres || "").split(",").map((g) => (
-                    <span key={g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-white/50">
-                      {g}
+                  {(Array.isArray(selected.genres) ? selected.genres : (selected.genres || "").split(",")).map((g) => (
+                    <span key={g?.id ?? g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-white/50">
+                      {g?.name ?? g}
                     </span>
                   ))}
                 </div>
