@@ -58,4 +58,4 @@ Notes:
 - `TMDB_API_KEY` is required for the TMDB import and backend TMDB lookups.
 - Keep the AI service in Docker for team convenience (heavy ML dependencies). If you prefer local Python, use Conda with Python 3.10.
 
-If you want, I can also add a UNIX `run-all.sh` and a short section describing common troubleshooting steps.
+
