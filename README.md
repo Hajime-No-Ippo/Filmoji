@@ -5,6 +5,7 @@ This project can be started with Docker Compose. The following shows the minimal
 **Prerequisites**
 - Docker & Docker Compose
 - A TMDB API key (required)
+- firebase-service-account.json (Stores your domain's auth db)
 
 **Create `.env` at the repository root**
 
@@ -33,18 +34,6 @@ HUGGINGFACE_API_TOKEN=your_hf_token
 docker compose up --build
 # or detached
 docker compose up --build -d
-```
-
-**If the AI import runs before the backend migrations complete**
-
-```bash
-docker compose up -d backend
-```
-
-**Compute / update vectors (inside ai container)**
-
-```bash
-docker exec -it filmoji-ai python generate_vectors.py --table movies
 ```
 
 **Verify**
