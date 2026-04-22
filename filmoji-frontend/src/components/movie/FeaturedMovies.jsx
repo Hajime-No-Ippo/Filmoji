@@ -58,23 +58,20 @@ function FeaturedMovies({ movies }) {
             {/** Place Holder
              * Could be place any content in the cards for effects
              */}
-            <Card>
-            </Card>
-
-            <Card>
-            </Card>
-
-            <Card>
-            </Card>
-
-            <Card>
-            </Card>
-
-            <Card>
-            </Card>
-            
-            <Card>
-            </Card>
+              {/* Render up to 6 poster cards using the passed `movies` prop */}
+              {movies.slice(0, 6).map((m, idx) => (
+                <Card key={m.id} className="overflow-hidden rounded-2xl bg-card flex items-center justify-center">
+                  {m.poster ? (
+                    <img
+                      src={m.poster || m.posterUrl}
+                      alt={m.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  ) : (
+                    <div className="text-muted text-sm">No poster</div>
+                  )}
+                </Card>
+              ))}
           </CardSwap>
         </div>
       </div>

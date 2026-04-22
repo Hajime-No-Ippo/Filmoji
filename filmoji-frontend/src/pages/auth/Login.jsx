@@ -111,18 +111,27 @@ function Login() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            <label htmlFor="login-email" className="sr-only">Email</label>
             <input
+              id="login-email"
+              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
+              aria-required="true"
               className="input-field"
             />
+
+            <label htmlFor="login-password" className="sr-only">Password</label>
             <input
+              id="login-password"
+              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
+              aria-required="true"
               className="input-field"
             />
 
@@ -130,6 +139,7 @@ function Login() {
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
+                  id="remember"
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}

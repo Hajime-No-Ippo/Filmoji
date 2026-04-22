@@ -1,7 +1,33 @@
-import { categories } from '../../data/categories'
+import { categories as staticCategories } from '../../data/categories'
 import CategoryCard from './CategoryCard'
+import { useEffect, useState } from 'react'
 
 function CategoriesSection() {
+  const [categories, setCategories] = useState(staticCategories)
+
+  useEffect(() => {
+    let mounted = true
+    fetch('/api/categories/counts')
+      .then((r) => r.json())
+      .then((data) => {
+        if (!mounted) return
+        // data: [{ id, name, count }, ...]
+        const map = new Map(data.map((g) => [g.name.toLowerCase(), g.count]))
+        const merged = staticCategories.map((c) => ({
+          ...c,
+          count: map.get(c.name.toLowerCase()) ?? c.count ?? 0,
+        }))
+        setCategories(merged)
+      })
+      .catch(() => {
+        /* keep static categories on error */
+      })
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   return (
     <section id="categories" className="section">
       <div className="container-main">
