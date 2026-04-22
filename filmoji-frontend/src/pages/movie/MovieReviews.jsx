@@ -32,6 +32,7 @@ useEffect(() => {
     .then(data => {
       const mapped = data.map(movie => ({
         ...movie,
+        id: movie.id,
         poster: movie.poster_url,
         year: movie.release_year,
         description: movie.synopsis
@@ -90,11 +91,7 @@ useEffect(() => {
       style={{ backgroundColor: "var(--color-dark)" }}
       className="min-h-screen pt-24 pb-12 px-4"
     >
-      {allReviews.length > 0 && (
-        <section className="mb-12">
-          <ReviewsWall reviews={allReviews} className="h-[32rem]" />
-        </section>
-      )}
+     
 
       <div className="max-w-5xl mx-auto">
         {/* Header */}
@@ -110,6 +107,17 @@ useEffect(() => {
           </p>
         </div>
 
+      {allReviews.length > 0 && (
+        <section className="mb-12 relative">
+          <ReviewsWall reviews={allReviews} className="h-[32rem]" />
+          {/* Fade out top and bottom edges */}
+          <div className="absolute inset-x-0 top-0 h-16 pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, var(--color-dark), transparent)' }} />
+          <div className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
+            style={{ background: 'linear-gradient(to top, var(--color-dark), transparent)' }} />
+        </section>
+      )}
+      
         {/* Movie Selection */}
         <div
           style={{
@@ -163,7 +171,7 @@ useEffect(() => {
           >
             <div className="flex flex-col md:flex-row gap-6">
               <img
-                src={selectedMovieData.poster}
+                src={selectedMovieData.posterUrl}
                 alt={selectedMovieData.title}
                 className="w-full md:w-48 h-72 object-cover rounded-lg"
               />

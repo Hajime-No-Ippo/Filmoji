@@ -22,6 +22,7 @@ import Onboarding from "./pages/user/Onboarding";
 import ProtectedRoute from "./components/functional/ProtectedRoute";
 import ScrollToTop from "./components/functional/ScrollToTop";
 import { WatchlistProvider } from "./components/watchlist/WatchlistContext";
+import Privacy from "./content/Privacy";
 
 function App() {
   return (
@@ -38,14 +39,6 @@ function App() {
             <Route path="/movie/:id" element={<MovieDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path="/dashboard"
               element={
@@ -100,6 +93,7 @@ function App() {
               element={<EmojiRecommendations />}
             />
             <Route path="/forget" element={<ForgotPassword />} />
+            <Route path="/privacy" element={<Privacy />} />
           </Routes>
         </main>
         <Footer />

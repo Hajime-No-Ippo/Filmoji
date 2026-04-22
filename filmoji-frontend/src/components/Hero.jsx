@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useScroll, useTransform, motion, AnimatePresence } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { useMoviesTrailer } from '../hooks/useMoviesAPIs'
-// import { featuredMovies } from '../data/movies'
+import { authFetch } from '../utils/api'
 import WaveDivider from './effects/WaveDivider/WaveDivider'
 
 // 16 basic emotion emojis split into 4 columns
@@ -84,12 +84,18 @@ const moodLabels = {
   // }, [])
 
 
+const moodToEmoji = {
+  happy: '😊', angry: '😡', cool: '😎', festive: '🥳',
+  sad: '😢', romantic: '😍', excited: '🤩', bored: '🥱',
+  scared: '😱', emotional: '🥺', mindblown: '🤯', peaceful: '😌',
+  laughing: '😂', thoughtful: '🤔', tense: '😤', overwhelmed: '🫠',
+}
+
 function Hero({ movies }) {
-  //  const [movies, setMovies] = useState([])
-  //  const [loading, setLoading] = useState(true)
   const { scrollY } = useScroll()
-  const [expanded, setExpanded] = useState(null)   // { emoji, mood, color, rect }
-  const selected = movies[0] || {}
+  const [expanded, setExpanded] = useState(null)
+  const [selected, setSelected] = useState(movies[0] || {})
+  const [loadingMovie, setLoadingMovie] = useState(false)
   const { trailerKey, loading: trailerLoading } = useMoviesTrailer(selected?.id)
 
   // Parallax activates once the emoji section scrolls into view (~1 viewport down)
@@ -99,9 +105,31 @@ function Hero({ movies }) {
   const y3 = useTransform(scrollY, [400, 1600], [0, -140])
   const yValues = [y0, y1, y2, y3]
 
-  const handleClick = (e, block) => {
+  const handleClick = async (e, block) => {
     const rect = e.currentTarget.getBoundingClientRect()
     setExpanded({ ...block, rect })
+    setLoadingMovie(true)
+    try {
+      const emoji = moodToEmoji[block.mood] || block.emoji
+      const res = await authFetch('/api/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emojis: emoji }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.length > 0) {
+          const m = data[0]
+          setSelected({
+            ...m,
+            year: m.releaseYear,
+            description: m.synopsis,
+            poster: m.posterUrl,
+          })
+        }
+      }
+    } catch (_) {}
+    setLoadingMovie(false)
   }
 
   const handleClose = () => setExpanded(null)
@@ -237,6 +265,7 @@ function Hero({ movies }) {
               {/* ── Right: film detail panel ── */}
               <div className="flex flex-col justify-center py-14 px-10 flex-1 max-w-xl">
 
+                {loadingMovie && <p className="text-white/40 text-sm mb-4 font-[Inter]">Finding a match…</p>}
                 <h2 className="text-2xl font-bold text-white mb-2">{selected.title}</h2>
                 <div className="flex items-center gap-3 mb-4">
                   <span className="text-xs text-white/40">{selected.year}</span>

@@ -15,7 +15,7 @@ function Login() {
     console.log('Login:', { email, password, remember })
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/"); // or navigate("/dashboard") to go to home page
+      navigate("/dashboard"); // or navigate("/dashboard") to go to home page
     } catch (error) {
       alert(error.message);
     }
