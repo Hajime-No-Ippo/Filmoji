@@ -39,9 +39,7 @@ function Recommendations() {
             poster: m.posterUrl || "",
             year: m.releaseYear,
             rating: m.rating,
-            genres: Array.isArray(m.genres)
-              ? m.genres
-              : (m.genres?.split(",") ?? []),
+            genres: Array.isArray(m.genres) ? m.genres : (m.genres?.split(",") ?? []),
           })),
         ),
       )

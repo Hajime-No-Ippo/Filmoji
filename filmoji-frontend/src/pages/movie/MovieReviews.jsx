@@ -1,17 +1,26 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { db } from "../../../firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+import { ReviewsWall } from "../../components/effects/ReviewsColumn/ReviewsColumn";
 //import { featuredMovies } from "../data/movies";
 
 function MovieReviews() {
   const [movies, setMovies] = useState([])
+  const [allReviews, setAllReviews] = useState([])
 
   const [searchParams] = useSearchParams()
   const [selectedMovie, setSelectedMovie] = useState(searchParams.get('movieId'));
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
+
+useEffect(() => {
+  const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(30))
+  getDocs(q).then(snap => {
+    setAllReviews(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+  }).catch(() => {})
+}, [])
 
 useEffect(() => {
   fetch('/api/movies')
@@ -23,6 +32,7 @@ useEffect(() => {
     .then(data => {
       const mapped = data.map(movie => ({
         ...movie,
+        id: movie.id,
         poster: movie.poster_url,
         year: movie.release_year,
         description: movie.synopsis
@@ -81,6 +91,8 @@ useEffect(() => {
       style={{ backgroundColor: "var(--color-dark)" }}
       className="min-h-screen pt-24 pb-12 px-4"
     >
+     
+
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -95,6 +107,17 @@ useEffect(() => {
           </p>
         </div>
 
+      {allReviews.length > 0 && (
+        <section className="mb-12 relative">
+          <ReviewsWall reviews={allReviews} className="h-[32rem]" />
+          {/* Fade out top and bottom edges */}
+          <div className="absolute inset-x-0 top-0 h-16 pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, var(--color-dark), transparent)' }} />
+          <div className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
+            style={{ background: 'linear-gradient(to top, var(--color-dark), transparent)' }} />
+        </section>
+      )}
+      
         {/* Movie Selection */}
         <div
           style={{
@@ -148,7 +171,7 @@ useEffect(() => {
           >
             <div className="flex flex-col md:flex-row gap-6">
               <img
-                src={selectedMovieData.poster}
+                src={selectedMovieData.posterUrl}
                 alt={selectedMovieData.title}
                 className="w-full md:w-48 h-72 object-cover rounded-lg"
               />
@@ -161,7 +184,7 @@ useEffect(() => {
                 </h2>
                 <p style={{ color: "var(--color-muted)" }} className="mb-4">
                   {selectedMovieData.year} •{" "}
-                  {selectedMovieData.genres.join(", ")}
+                  {(selectedMovieData.genres || []).map(g => g?.name ?? g).join(', ')}
                 </p>
                 <div className="flex items-center space-x-6">
                   <div>

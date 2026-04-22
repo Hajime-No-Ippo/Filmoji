@@ -24,7 +24,8 @@ public class MovieEnrichmentRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         movieRepository.findAll().forEach(movie -> {
-            if (movie.getPosterUrl() == null || movie.getPosterUrl().isBlank()) {
+            if (movie.getPosterUrl() == null || movie.getPosterUrl().isBlank()
+                    || movie.getTrailerKey() == null || movie.getTrailerKey().isBlank()) {
                 try {
                     Movie enriched = tmdbService.enrichMovieFromTmdb(movie);
                     // Use native query to avoid vector type cast issue

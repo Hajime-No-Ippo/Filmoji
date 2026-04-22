@@ -1,5 +1,5 @@
 # Build stage
-FROM maven:3.9.6-eclipse-temurin-17 AS builder
+FROM maven:3.9-amazoncorretto-17 AS builder
 
 WORKDIR /app
 
@@ -22,12 +22,12 @@ COPY backend/src src
 RUN ./mvnw clean package -DskipTests
 
 # Runtime stage
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
 # Install curl so container can respond to healthchecks that call the local actuator endpoint
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
 

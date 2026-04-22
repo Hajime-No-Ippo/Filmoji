@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Link } from 'react-router-dom'
 import { authFetch } from '../../utils/api'
+import { useMoviesTrailer } from '../../hooks/useMoviesAPIs'
 
 const columns = [
   {
@@ -65,7 +66,7 @@ function EmojiGrid({ yValues = [0, 0, 0, 0] }) {
   const [expanded, setExpanded] = useState(null)
   const [selectedMovie, setSelectedMovie] = useState(null)
   const [recLoading, setRecLoading] = useState(false)
-  const trailerKey = selectedMovie?.trailerKey ?? null
+  const { trailerKey } = useMoviesTrailer(selectedMovie?.id)
 
   const handleClick = (e, block) => {
     setExpanded({ ...block, rect: e.currentTarget.getBoundingClientRect() })
@@ -201,8 +202,8 @@ function EmojiGrid({ yValues = [0, 0, 0, 0] }) {
                       <span className="text-xs text-white/40">{selectedMovie.releaseYear}</span>
                       <span className="text-xs text-yellow-500 font-[Inter]">★ {selectedMovie.rating?.toFixed(1)}</span>
                       {(Array.isArray(selectedMovie.genres) ? selectedMovie.genres : selectedMovie.genres?.split(',') ?? []).map((g) => (
-                        <span key={g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-white/50">
-                          {g.trim()}
+                        <span key={g?.id ?? g} className="text-[10px] px-2 py-0.5 rounded-full bg-black/5 text-white/50">
+                          {(g?.name ?? g)?.trim?.()}
                         </span>
                       ))}
                     </div>

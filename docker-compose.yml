@@ -4,14 +4,14 @@ services:
     container_name: filmoji-postgres
     environment:
       POSTGRES_DB: filmoji
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_USER: filmoji
+      POSTGRES_PASSWORD: filmoji_pw
     ports:
-      - "5432:5432"
+      - "5412:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U filmoji"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,8 +27,8 @@ services:
       - "8000:8000"
     env_file: .env
     environment:
-      DB_URL: "postgresql://postgres:postgres_password@db:5432/filmoji"
-      DB_PASSWORD: postgres_password
+      DB_URL: "postgresql://filmoji:filmoji_pw@db:5432/filmoji"
+      DB_PASSWORD: filmoji_pw
       TMDB_API_KEY: "${TMDB_API_KEY}"
     depends_on:
       db:
@@ -49,8 +49,8 @@ services:
     env_file: .env
     environment:
       DB_URL: "jdbc:postgresql://db:5432/filmoji"
-      DB_USER: "${DB_USER:-postgres}"
-      DB_PASSWORD: "${DB_PASSWORD:-postgres_password}"
+      DB_USER: "${DB_USER:-filmoji}"
+      DB_PASSWORD: "${DB_PASSWORD:-filmoji_pw}"
       TMDB_API_KEY: "${TMDB_API_KEY}"
     depends_on:
       db:

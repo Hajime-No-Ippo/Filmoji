@@ -3,16 +3,12 @@ import Hero from '../components/Hero'
 import FeaturedMovies from '../components/movie/FeaturedMovies'
 import CategoriesSection from '../components/category/CategoriesSection'
 
-
 function Home() {
   const [movies, setMovies] = useState([])
+
   useEffect(() => {
     fetch('/api/movies')
       .then(res => res.json())
-      // .then(data => {
-      //   setMovies(data)
-      //   setLoading(false)
-      // })
       .then(data => {
         const mapped = data.map(movie => ({
           ...movie,

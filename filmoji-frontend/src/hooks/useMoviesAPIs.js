@@ -95,7 +95,7 @@ export function useMoviesTrailer(tmdbId) {
 
     setLoading(true)
 
-    fetch(`/api/movies/tmdb/${tmdbId}/trailer`)
+    fetch(`/api/movies/${tmdbId}/trailer`)
       .then((res) => res.json())
       .then((data) => setTrailerKey(data.trailerKey ?? null))
       .catch((err) => {

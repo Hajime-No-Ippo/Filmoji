@@ -18,7 +18,7 @@ function MoodInput() {
         value={mood}
         onChange={(e) => setMood(e.target.value)}
         placeholder="Which emoji do you want to feel like today?"
-        className="w-full py-3.5 pl-6 pr-14 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-white placeholder-white/50 text-sm outline-none focus:border-white/60 transition-colors"
+        className="w-full py-3.5 pl-6 pr-14 rounded-full bg-black/15 backdrop-blur-md border border-white/30 text-white placeholder-white/50 text-sm outline-none focus:border-white/60 transition-colors"
       />
       <button
         type="submit"

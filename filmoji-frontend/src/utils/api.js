@@ -7,7 +7,7 @@ import { auth } from '../../firebase'
 export async function authFetch(url, options = {}) {
   const user = auth.currentUser
   if (user) {
-    const token = await user.getIdToken()
+    const token = await user.getIdToken(/* forceRefresh */ true)
     options = {
       ...options,
       headers: {

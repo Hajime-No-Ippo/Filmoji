@@ -6,8 +6,8 @@ model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 conn = psycopg2.connect(
     dbname="filmoji",
-    user="postgres",
-    password="postgres_password",
+    user="filmoji",
+    password="filmoji_pw",
     host="db",
     port=5432
 )
