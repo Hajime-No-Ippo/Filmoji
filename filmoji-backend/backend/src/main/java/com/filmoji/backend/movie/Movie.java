@@ -46,6 +46,7 @@ public class Movie {
 
     @Convert(converter = VectorConverter.class)
     @Column(name = "movie_vector", columnDefinition = "vector(384)")
+    @org.hibernate.annotations.ColumnTransformer(write = "?::vector")
     private float[] movieVector;
 
     @Column(name = "created_at")

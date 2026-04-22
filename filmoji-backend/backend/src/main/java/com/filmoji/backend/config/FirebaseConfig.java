@@ -4,13 +4,11 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,46 +26,32 @@ public class FirebaseConfig {
     private String projectId;
 
     @Bean
-    @Lazy
-    public Optional<FirebaseApp> firebaseApp() {
+    public FirebaseAuth firebaseAuth() {
         try {
             if (!FirebaseApp.getApps().isEmpty()) {
-                return Optional.of(FirebaseApp.getInstance());
+                return FirebaseAuth.getInstance();
             }
 
-            // Only attempt to load credentials from an explicit file path.
-            if (credentialsPath != null && !credentialsPath.isEmpty() && !credentialsPath.equals("/firebase-service-account.json")) {
+            if (credentialsPath != null && !credentialsPath.isEmpty()
+                    && !credentialsPath.equals("/firebase-service-account.json")) {
                 try (InputStream serviceAccount = new FileInputStream(credentialsPath)) {
                     GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
                     FirebaseOptions options = FirebaseOptions.builder()
                             .setCredentials(credentials)
                             .setProjectId(projectId)
                             .build();
-                    return Optional.of(FirebaseApp.initializeApp(options));
+                    FirebaseApp.initializeApp(options);
+                    log.info("Firebase initialized with credentials from {}", credentialsPath);
+                    return FirebaseAuth.getInstance();
                 } catch (IOException e) {
-                    log.warn("Could not load Firebase credentials from file: {}", credentialsPath, e);
+                    log.warn("Could not load Firebase credentials from {}: {}", credentialsPath, e.getMessage());
                 }
             } else {
-                log.info("No firebase.credentials.path provided; skipping Firebase initialization");
-            }
-
-            return Optional.empty();
-        } catch (Exception e) {
-            log.warn("Could not initialize Firebase - Firebase features will be disabled: {}", e.getMessage());
-            return Optional.empty();
-        }
-    }
-
-    @Bean
-    @Lazy
-    public Optional<FirebaseAuth> firebaseAuth(Optional<FirebaseApp> firebaseApp) {
-        try {
-            if (firebaseApp.isPresent()) {
-                return Optional.of(FirebaseAuth.getInstance());
+                log.warn("No firebase.credentials.path configured — Firebase auth disabled");
             }
         } catch (Exception e) {
-            log.warn("Firebase Auth not available: {}", e.getMessage());
+            log.warn("Firebase initialization failed: {}", e.getMessage());
         }
-        return Optional.empty();
+        return null;
     }
 }

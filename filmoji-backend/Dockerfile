@@ -17,6 +17,7 @@ RUN ./mvnw dependency:resolve
 
 # Copy source code
 COPY backend/src src
+COPY backend/firebase-service-account.json firebase-service-account.json 
 
 # Build
 RUN ./mvnw clean package -DskipTests
@@ -30,6 +31,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/firebase-service-account.json firebase-service-account.json
 
 EXPOSE 8080
 

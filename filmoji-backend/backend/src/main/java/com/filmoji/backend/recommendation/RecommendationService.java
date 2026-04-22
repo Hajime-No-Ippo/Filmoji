@@ -30,6 +30,27 @@ public class RecommendationService {
 
     private static final Logger log = LoggerFactory.getLogger(RecommendationService.class);
 
+    private static final Map<String, List<String>> EMOJI_GENRES = Map.ofEntries(
+        Map.entry("😊", List.of("Comedy", "Animation", "Family", "Adventure")),
+        Map.entry("😢", List.of("Drama", "Romance")),
+        Map.entry("😱", List.of("Horror", "Thriller", "Mystery")),
+        Map.entry("😂", List.of("Comedy", "Animation")),
+        Map.entry("❤️", List.of("Romance", "Drama")),
+        Map.entry("😍", List.of("Romance", "Drama")),
+        Map.entry("🔥", List.of("Action", "Thriller", "Crime")),
+        Map.entry("🤔", List.of("Drama", "Science Fiction", "Mystery", "Documentary")),
+        Map.entry("👻", List.of("Horror", "Thriller")),
+        Map.entry("🚀", List.of("Science Fiction", "Adventure", "Action")),
+        Map.entry("🤯", List.of("Science Fiction", "Thriller", "Mystery")),
+        Map.entry("🥱", List.of("Comedy", "Animation", "Family")),
+        Map.entry("😌", List.of("Animation", "Family", "Documentary")),
+        Map.entry("🥳", List.of("Comedy", "Animation", "Family", "Adventure")),
+        Map.entry("🫠", List.of("Thriller", "Drama", "Science Fiction")),
+        Map.entry("😤", List.of("Action", "Crime", "Thriller")),
+        Map.entry("🥺", List.of("Drama", "Romance")),
+        Map.entry("😎", List.of("Action", "Crime", "Comedy"))
+    );
+
     private static final Map<String, String> EMOJI_EMOTIONS = Map.ofEntries(
             Map.entry("😊", "happy joyful cheerful uplifting"),
             Map.entry("😢", "sad melancholic emotional tearful"),
@@ -54,6 +75,11 @@ public class RecommendationService {
             Map.entry("🌊", "flowing contemplative deep emotional journey"),
             Map.entry("✨", "magical whimsical beautiful enchanting"),
             Map.entry("😎", "cool stylish confident action-packed"),
+            Map.entry("🥱", "relaxed slow calm easygoing cozy"),
+            Map.entry("😌", "peaceful serene gentle quiet contemplative"),
+            Map.entry("🥳", "festive celebratory fun exciting party"),
+            Map.entry("😍", "romantic love passionate heartwarming"),
+            Map.entry("🫠", "overwhelmed anxious intense chaotic"),
             Map.entry("🫂", "warm comforting family friendship bonds"),
             Map.entry("🎬", "cinematic dramatic epic storytelling"),
             Map.entry("🥰", "loving warm tender romantic adoring"),
@@ -131,20 +157,38 @@ public class RecommendationService {
         float[] emojiVector   = embeddingService.getEmbedding(emotionText);
         float[] profileVector = (user != null) ? userProfileService.getProfileVector(user) : null;
 
+        // Get compatible genres for this emoji first
+        List<String> primaryEmoji = extractEmojis(emojiString);
+        List<String> genreFilter = primaryEmoji.isEmpty() ? List.of()
+                : EMOJI_GENRES.getOrDefault(primaryEmoji.get(0), List.of());
+
         float[] queryVector;
-        if (profileVector != null) {
-            queryVector = embeddingService.weightedCombine(emojiVector, profileVector, 0.6f, 0.4f);
+        if (profileVector != null && !genreFilter.isEmpty()) {
+            // Genre filter already constrains results — use pure emoji vector for quality
+            queryVector = embeddingService.normalize(emojiVector);
+        } else if (profileVector != null) {
+            queryVector = embeddingService.weightedCombine(emojiVector, profileVector, 0.8f, 0.2f);
         } else {
             queryVector = embeddingService.normalize(emojiVector);
         }
 
         String vectorStr = embeddingService.vectorToString(queryVector);
-        List<Movie> movies = movieRepository.findTopNByVectorSimilarity(vectorStr, limit + 2);
+        List<Movie> raw;
 
-        if (movies.isEmpty()) {
-            log.warn("No movies found via vector search — falling back to random picks.");
-            movies = movieRepository.findRandomMovies(limit + 2);
+        if (!genreFilter.isEmpty()) {
+            raw = movieRepository.findTopNByVectorSimilarityAndGenres(vectorStr, genreFilter, limit + 2);
+            log.info("Genre-filtered search with genres: {}", genreFilter);
+        } else {
+            raw = movieRepository.findTopNByVectorSimilarity(vectorStr, limit + 2);
         }
+
+        if (raw.isEmpty()) {
+            log.warn("No movies found via vector search — falling back to random picks.");
+            raw = movieRepository.findRandomMovies(limit + 2);
+        }
+
+        List<Integer> ids = raw.stream().map(Movie::getId).toList();
+        List<Movie> movies = ids.isEmpty() ? raw : movieRepository.findByIdsWithGenres(ids);
 
         if (movies.isEmpty()) {
             log.error("No movies in database at all.");

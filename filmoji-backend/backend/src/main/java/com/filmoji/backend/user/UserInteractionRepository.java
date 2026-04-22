@@ -4,12 +4,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface UserInteractionRepository extends JpaRepository<UserInteraction, UUID> {
 
     List<UserInteraction> findByUserId(UUID userId);
+
+    Optional<UserInteraction> findByUserIdAndMovieId(UUID userId, Integer movieId);
 
     List<UserInteraction> findByUserIdAndInteractionType(UUID userId, String interactionType);
 
