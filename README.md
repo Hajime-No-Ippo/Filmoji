@@ -38,9 +38,7 @@ docker compose up --build -d
 **If the AI import runs before the backend migrations complete**
 
 ```bash
-# Start backend first, then recreate ai-service to re-run import
 docker compose up -d backend
-docker compose up -d --no-deps --force-recreate ai-service
 ```
 
 **Compute / update vectors (inside ai container)**
