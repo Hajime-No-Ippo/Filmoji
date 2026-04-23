@@ -39,7 +39,14 @@ function UserProfile() {
         return true;
       })
       .map((review) => {
-        const movie = allMovies.find((m) => m.id === review.movieId);
+        const findMovieById = (id) => {
+          const n = Number(id);
+          return allMovies.find(
+            (m) => m.id === id || m.tmdbId === id || m.id === n || m.tmdbId === n,
+          );
+        };
+
+        const movie = findMovieById(review.movieId);
         return { review, movie };
       })
       .filter(({ movie }) => Boolean(movie));
@@ -76,12 +83,20 @@ function UserProfile() {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        loadUserReviews(currentUser.uid);
-        loadUserProfile(currentUser);
+        setLoading(true);
+        (async () => {
+          try {
+            await Promise.all([loadUserReviews(currentUser.uid), loadUserProfile(currentUser)]);
+          } catch (e) {
+            console.error("Error loading user data:", e);
+          } finally {
+            setLoading(false);
+          }
+        })();
       } else {
         navigate("/login");
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();

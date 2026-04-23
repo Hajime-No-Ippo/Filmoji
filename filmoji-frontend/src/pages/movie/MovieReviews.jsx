@@ -83,7 +83,9 @@ useEffect(() => {
   };
 
   const selectedMovieData = selectedMovie
-    ? movies.find((m) => m.id === parseInt(selectedMovie))
+    ? movies.find(
+        (m) => m.id === parseInt(selectedMovie) || m.tmdbId === parseInt(selectedMovie),
+      )
     : null;
 
   return (

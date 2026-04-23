@@ -13,16 +13,16 @@ def get_db_connection_from_env():
     db_url = os.getenv("DB_URL") or os.getenv("DATABASE_URL")
     if db_url:
         parsed = urllib.parse.urlparse(db_url)
-        dbname = parsed.path.lstrip("/") or os.getenv("DB_NAME", "filmoji-postgres")
-        user = parsed.username or os.getenv("DB_USER", "filmoji")
-        password = parsed.password or os.getenv("DB_PASSWORD", "filmoji_pw")
-        host = parsed.hostname or os.getenv("DB_HOST", "localhost")
+        dbname = parsed.path.lstrip("/") or os.getenv("DB_NAME", "filmoji")
+        user = parsed.username or os.getenv("DB_USER", "DB_USER")
+        password = parsed.password or os.getenv("DB_PASSWORD", "DB_PASSWORD")
+        host = parsed.hostname or os.getenv("DB_HOST", "DB_HOST")
         port = parsed.port or int(os.getenv("DB_PORT", 5432))
     else:
         dbname = os.getenv("DB_NAME", "filmoji")
-        user = os.getenv("DB_USER", "postgres")
-        password = os.getenv("DB_PASSWORD", "postgres_password")
-        host = os.getenv("DB_HOST", "db")
+        user = os.getenv("DB_USER", "DB_USER")
+        password = os.getenv("DB_PASSWORD", "DB_PASSWORD")
+        host = os.getenv("DB_HOST", "DB_HOST")
         port = int(os.getenv("DB_PORT", 5432))
 
     return psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port)

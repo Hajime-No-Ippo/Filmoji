@@ -27,12 +27,30 @@ function MovieDetail() {
   const { trailerKey, loading: trailerLoading } = useMoviesTrailer(movie?.id)
 
   useEffect(() => {
+    let mounted = true
+    setLoading(true)
+
     fetch(`/api/movies/${id}`)
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data) setMovie({ ...data, year: data.releaseYear, description: data.synopsis })
+      .then(async (res) => {
+        if (res.ok) return res.json()
+        // fallback: backend exposes list endpoint — try to find by tmdbId or id
+        try {
+          const listRes = await fetch('/api/movies?limit=10000')
+          if (!listRes.ok) return null
+          const list = await listRes.json()
+          const parsed = parseInt(id, 10)
+          return list.find(m => m.id === parsed || m.tmdbId === parsed || m.id === id || m.tmdbId === id) || null
+        } catch (e) {
+          return null
+        }
       })
-      .finally(() => setLoading(false))
+      .then(data => {
+        if (mounted && data) setMovie({ ...data, year: data.releaseYear, description: data.synopsis })
+      })
+      .catch(() => {})
+      .finally(() => { if (mounted) setLoading(false) })
+
+    return () => { mounted = false }
   }, [id])
 
   useEffect(() => {

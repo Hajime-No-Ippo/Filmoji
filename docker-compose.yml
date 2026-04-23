@@ -4,14 +4,14 @@ services:
     container_name: filmoji-postgres
     environment:
       POSTGRES_DB: filmoji
-      POSTGRES_USER: filmoji
-      POSTGRES_PASSWORD: filmoji_pw
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5412:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U filmoji"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,8 +27,8 @@ services:
       - "8000:8000"
     env_file: .env
     environment:
-      DB_URL: "postgresql://filmoji:filmoji_pw@db:5432/filmoji"
-      DB_PASSWORD: filmoji_pw
+      DB_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/filmoji"
+      DB_PASSWORD: ${DB_PASSWORD}
       TMDB_API_KEY: "${TMDB_API_KEY}"
       TMDB_PAGES: "50"
     depends_on:
@@ -50,9 +50,9 @@ services:
     env_file: .env
     environment:
       FIREBASE_CREDENTIALS_PATH: "/app/firebase-service-account.json" 
-      DB_URL: "jdbc:postgresql://db:5432/filmoji"
-      DB_USER: "${DB_USER:-filmoji}"
-      DB_PASSWORD: "${DB_PASSWORD:-filmoji_pw}"
+      DB_URL: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/filmoji"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
       TMDB_API_KEY: "${TMDB_API_KEY}"
     depends_on:
       db:
@@ -64,6 +64,8 @@ services:
       retries: 5
     networks:
       - filmoji-network
+    volumes:
+    - ./filmoji-backend/backend/firebase-service-account.json:/app/firebase-service-account.json:ro
 
   frontend:
     build:

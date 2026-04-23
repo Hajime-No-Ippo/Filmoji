@@ -40,7 +40,14 @@ function Watchlist({ allMovies }) {
         <div className="mt-6 overflow-x-auto">
           <div className="flex gap-6 pb-2">
             {watchlist.map((movieId) => {
-              const movie = allMovies?.find((m) => m.id === movieId);
+              const findMovieById = (id) => {
+                const n = Number(id);
+                return allMovies?.find(
+                  (m) => m.id === id || m.tmdbId === id || m.id === n || m.tmdbId === n,
+                );
+              };
+
+              const movie = findMovieById(movieId);
               const poster =
                 movie?.posterUrl ||
                 movie?.poster ||

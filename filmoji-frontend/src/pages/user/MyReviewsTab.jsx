@@ -192,9 +192,14 @@ export default function MyReviewsTab({
         </div>
       ) : (
         userReviews.map((review) => {
-          const movieTitle =
-            allMovies.find((m) => m.id === review.movieId)?.title ??
-            "Unknown Movie";
+          const findMovieById = (id) => {
+            const n = Number(id);
+            return allMovies.find(
+              (m) => m.id === id || m.tmdbId === id || m.id === n || m.tmdbId === n,
+            );
+          };
+
+          const movieTitle = findMovieById(review.movieId)?.title ?? "Unknown Movie";
 
           return (
             <div

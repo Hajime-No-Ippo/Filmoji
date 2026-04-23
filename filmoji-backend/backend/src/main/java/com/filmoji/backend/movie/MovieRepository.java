@@ -15,6 +15,9 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     Optional<Movie> findByTmdbId(Integer tmdbId);
 
+        @Query("SELECT m FROM Movie m LEFT JOIN FETCH m.genres WHERE m.tmdbId = :tmdbId")
+        Optional<Movie> findByTmdbIdWithGenres(@Param("tmdbId") Integer tmdbId);
+
     @Query("SELECT m FROM Movie m LEFT JOIN FETCH m.genres WHERE m.id = :id")
     Optional<Movie> findByIdWithGenres(@Param("id") Integer id);
 

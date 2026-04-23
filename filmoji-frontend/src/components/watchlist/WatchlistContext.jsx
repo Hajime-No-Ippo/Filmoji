@@ -45,7 +45,12 @@ export function WatchlistProvider({ children }) {
       profileRef,
       (snap) => {
         const data = snap.data();
-        const ids = Array.isArray(data?.watchlist) ? data.watchlist : [];
+        const raw = Array.isArray(data?.watchlist) ? data.watchlist : [];
+        const normalizeId = (id) => {
+          const n = Number(id);
+          return Number.isNaN(n) ? id : n;
+        };
+        const ids = raw.map(normalizeId);
         setWatchlist(ids);
         setLoading(false);
       },
@@ -61,7 +66,9 @@ export function WatchlistProvider({ children }) {
   const isInWatchlist = useCallback(
     (movieId) => {
       if (movieId === undefined || movieId === null) return false;
-      return watchlist.includes(movieId);
+      const n = Number(movieId);
+      const idToCheck = Number.isNaN(n) ? movieId : n;
+      return watchlist.includes(idToCheck);
     },
     [watchlist],
   );
@@ -72,12 +79,14 @@ export function WatchlistProvider({ children }) {
       if (movieId === undefined || movieId === null) return;
 
       const profileRef = doc(db, "userProfiles", user.uid);
-      const inList = watchlist.includes(movieId);
+      const n = Number(movieId);
+      const normalized = Number.isNaN(n) ? movieId : n;
+      const inList = watchlist.includes(normalized);
 
       await setDoc(
         profileRef,
         {
-          watchlist: inList ? arrayRemove(movieId) : arrayUnion(movieId),
+          watchlist: inList ? arrayRemove(normalized) : arrayUnion(normalized),
         },
         { merge: true },
       );

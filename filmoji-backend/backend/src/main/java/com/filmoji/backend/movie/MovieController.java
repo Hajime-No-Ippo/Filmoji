@@ -106,24 +106,53 @@ public class MovieController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getMovie(@PathVariable Integer id) {
-        return movies.findByIdWithGenres(id)
-            .map(movie -> {
-                Map<String, Object> response = new LinkedHashMap<>();
-                response.put("id",          movie.getId());
-                response.put("tmdbId",       movie.getTmdbId());
-                response.put("title",        movie.getTitle());
-                response.put("synopsis",     movie.getSynopsis() != null ? movie.getSynopsis() : "");
-                response.put("posterUrl",    movie.getPosterUrl() != null ? movie.getPosterUrl() : "");
-                response.put("trailerKey",   movie.getTrailerKey() != null ? movie.getTrailerKey() : "");
-                response.put("releaseYear",  movie.getReleaseYear());
-                response.put("rating",       movie.getRating());
-                response.put("language",     movie.getLanguage());
-                response.put("genres",       movie.getGenres() != null
-                    ? movie.getGenres().stream().map(g -> g.getName()).toList()
-                    : List.of());
-                return ResponseEntity.ok(response);
-            })
-            .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Map<String, Object>> getMovie(@PathVariable String id) {
+        Integer parsedId = null;
+        try {
+            parsedId = Integer.valueOf(id);
+        } catch (NumberFormatException ignored) {}
+
+        try {
+            // 1) Try by internal id (with genres)
+            if (parsedId != null) {
+                var byId = movies.findByIdWithGenres(parsedId);
+                if (byId.isPresent()) return ResponseEntity.ok(toResponse(byId.get()));
+
+                // 2) Try by tmdbId (with genres)
+                var byTmdb = movies.findByTmdbIdWithGenres(parsedId);
+                if (byTmdb.isPresent()) return ResponseEntity.ok(toResponse(byTmdb.get()));
+
+                // 3) If not found in DB, try to fetch from TMDB on-the-fly
+                var enriched = new Movie();
+                enriched.setTmdbId(parsedId);
+                enriched = tmdbService.enrichMovieFromTmdb(enriched);
+                if (enriched.getTitle() != null) {
+                    return ResponseEntity.ok(toResponse(enriched));
+                }
+            }
+
+            // If id is not numeric, return not found (no other lookup)
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.warn("Error resolving movie {}: {}", id, e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private Map<String, Object> toResponse(Movie movie) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("id",          movie.getId());
+        response.put("tmdbId",      movie.getTmdbId());
+        response.put("title",       movie.getTitle());
+        response.put("synopsis",    movie.getSynopsis() != null ? movie.getSynopsis() : "");
+        response.put("posterUrl",   movie.getPosterUrl() != null ? movie.getPosterUrl() : "");
+        response.put("trailerKey",  movie.getTrailerKey() != null ? movie.getTrailerKey() : "");
+        response.put("releaseYear", movie.getReleaseYear());
+        response.put("rating",      movie.getRating());
+        response.put("language",    movie.getLanguage());
+        response.put("genres",      movie.getGenres() != null
+                ? movie.getGenres().stream().map(g -> g.getName()).toList()
+                : List.of());
+        return response;
     }
 }

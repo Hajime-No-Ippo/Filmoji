@@ -6,9 +6,9 @@ model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 conn = psycopg2.connect(
     dbname="filmoji",
-    user="filmoji",
-    password="filmoji_pw",
-    host="db",
+    user="DB_USER",
+    password="DB_PASSWORD",
+    host="DB_HOST",
     port=5432
 )
 

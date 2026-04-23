@@ -124,7 +124,7 @@ function Hero({ movies }) {
             ...m,
             year: m.releaseYear,
             description: m.synopsis,
-            poster: m.posterUrl,
+            poster: m.poster_url,
           })
         }
       }
