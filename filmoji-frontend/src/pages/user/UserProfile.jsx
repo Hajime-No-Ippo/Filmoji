@@ -28,18 +28,48 @@ function UserProfile() {
 
   const previewReviews = userReviews.slice(0, 3);
 
-  const ratedMovies = userReviews
-    .map((review) => {
-      const movie = allMovies.find((m) => m.id === review.movieId);
-      return { review, movie };
-    })
-    .filter(({ movie }) => Boolean(movie));
+  const ratedMovies = (() => {
+    const seenMovies = new Set();
+    return userReviews
+      .filter((review) => {
+        if (seenMovies.has(review.movieId)) {
+          return false;
+        }
+        seenMovies.add(review.movieId);
+        return true;
+      })
+      .map((review) => {
+        const movie = allMovies.find((m) => m.id === review.movieId);
+        return { review, movie };
+      })
+      .filter(({ movie }) => Boolean(movie));
+  })();
 
   useEffect(() => {
+    console.log("🚀 Starting to fetch movies from /api/movies");
     fetch("/api/movies")
-      .then((res) => res.json())
-      .then((data) => setAllMovies(data))
-      .catch(() => {});
+      .then((res) => {
+        console.log("📡 API Response Status:", {
+          status: res.status,
+          statusText: res.statusText,
+          ok: res.ok,
+        });
+        return res.json();
+      })
+      .then((data) => {
+        console.log("📽️ Movies Loaded:", {
+          dataType: typeof data,
+          isArray: Array.isArray(data),
+          count: data?.length || 0,
+          sample: data?.[0],
+          fullData: data,
+        });
+        setAllMovies(data || []);
+      })
+      .catch((error) => {
+        console.error("❌ Failed to load movies:", error);
+        setAllMovies([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -85,6 +115,11 @@ function UserProfile() {
         const aTime = a.createdAt?.toMillis?.() || 0;
         const bTime = b.createdAt?.toMillis?.() || 0;
         return bTime - aTime;
+      });
+
+      console.log("⭐ Reviews Loaded:", {
+        count: reviews.length,
+        sample: reviews[0],
       });
 
       setUserReviews(reviews);
@@ -343,111 +378,132 @@ function UserProfile() {
               My Ratings.
             </p>
 
-            <div className="mt-5 space-y-4">
-              {previewReviews.map((review) => {
-                const movie = allMovies.find((m) => m.id === review.movieId);
-                const createdDate =
-                  review.createdAt?.toDate?.() ||
-                  (typeof review.createdAt?.seconds === "number"
-                    ? new Date(review.createdAt.seconds * 1000)
-                    : null);
-                const formattedDate = createdDate
-                  ? new Intl.DateTimeFormat("en-CA", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    }).format(createdDate)
-                  : "";
-                const poster =
-                  movie?.posterUrl ||
-                  movie?.poster ||
-                  movie?.posterPath ||
-                  movie?.poster_path ||
-                  "";
+            <div
+              className="mt-5 space-y-4 overflow-y-auto pr-2"
+              style={{
+                maxHeight: userReviews.length > 3 ? "560px" : "auto",
+                scrollBehavior: "smooth",
+              }}
+            >
+              {(() => {
+                const seenMovies = new Set();
+                return userReviews
+                  .filter((review) => {
+                    if (seenMovies.has(review.movieId)) {
+                      return false;
+                    }
+                    seenMovies.add(review.movieId);
+                    return true;
+                  })
+                  .map((review) => {
+                    const movie = allMovies.find(
+                      (m) => m.id === review.movieId,
+                    );
+                    const createdDate =
+                      review.createdAt?.toDate?.() ||
+                      (typeof review.createdAt?.seconds === "number"
+                        ? new Date(review.createdAt.seconds * 1000)
+                        : null);
+                    const formattedDate = createdDate
+                      ? new Intl.DateTimeFormat("en-CA", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }).format(createdDate)
+                      : "";
+                    const poster =
+                      movie?.posterUrl ||
+                      movie?.poster ||
+                      movie?.posterPath ||
+                      movie?.poster_path ||
+                      "";
 
-                return (
-                  <button
-                    key={review.id}
-                    type="button"
-                    onClick={() => handleEditReview(review)}
-                    className="w-full text-left rounded-xl p-4 transition shadow-md hover:shadow-lg"
-                    style={{ backgroundColor: "var(--color-card)" }}
-                  >
-                    <div className="flex gap-4">
-                      <div className="shrink-0">
-                        {poster ? (
-                          <img
-                            src={poster}
-                            alt={movie?.title || "Movie poster"}
-                            className="w-14 h-20 object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div
-                            className="w-14 h-20 rounded-lg flex items-center justify-center text-xs"
-                            style={{
-                              backgroundColor: "var(--color-dark-light)",
-                              color: "var(--color-muted)",
-                            }}
-                          >
-                            No
-                            <br />
-                            poster
+                    return (
+                      <button
+                        key={review.id}
+                        type="button"
+                        onClick={() => handleEditReview(review)}
+                        className="w-full text-left rounded-xl p-4 transition shadow-md hover:shadow-lg"
+                        style={{ backgroundColor: "var(--color-card)" }}
+                      >
+                        <div className="flex gap-4">
+                          <div className="shrink-0">
+                            {poster ? (
+                              <img
+                                src={poster}
+                                alt={movie?.title || "Movie poster"}
+                                className="w-14 h-20 object-cover rounded-lg"
+                              />
+                            ) : (
+                              <div
+                                className="w-14 h-20 rounded-lg flex items-center justify-center text-xs"
+                                style={{
+                                  backgroundColor: "var(--color-dark-light)",
+                                  color: "var(--color-muted)",
+                                }}
+                              >
+                                No
+                                <br />
+                                poster
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
 
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div
-                            className="text-lg font-semibold leading-snug truncate"
-                            style={{ color: "var(--color-ink)" }}
-                            title={movie?.title || `Movie #${review.movieId}`}
-                          >
-                            {movie?.title || `Movie #${review.movieId}`}
-                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <div
+                                className="text-lg font-semibold leading-snug truncate"
+                                style={{ color: "var(--color-ink)" }}
+                                title={
+                                  movie?.title || `Movie #${review.movieId}`
+                                }
+                              >
+                                {movie?.title || `Movie #${review.movieId}`}
+                              </div>
 
-                          <div className="shrink-0 flex items-center gap-2">
-                            <span style={{ color: "var(--color-accent)" }}>
-                              ★
-                            </span>
-                            <span
-                              className="font-semibold"
-                              style={{ color: "var(--color-ink)" }}
-                            >
-                              {review.rating}
-                            </span>
-                            <span style={{ color: "var(--color-muted)" }}>
-                              /10
-                            </span>
+                              <div className="shrink-0 flex items-center gap-2">
+                                <span style={{ color: "var(--color-accent)" }}>
+                                  ★
+                                </span>
+                                <span
+                                  className="font-semibold"
+                                  style={{ color: "var(--color-ink)" }}
+                                >
+                                  {review.rating}
+                                </span>
+                                <span style={{ color: "var(--color-muted)" }}>
+                                  /10
+                                </span>
+                              </div>
+                            </div>
+
+                            {review.comment ? (
+                              <div
+                                className="mt-3 text-sm leading-relaxed"
+                                style={{ color: "var(--color-muted)" }}
+                              >
+                                {review.comment}
+                              </div>
+                            ) : null}
+
+                            {formattedDate ? (
+                              <div
+                                className={`${review.comment ? "mt-2" : "mt-3"} text-xs text-right`}
+                                style={{ color: "var(--color-muted)" }}
+                              >
+                                {formattedDate}
+                              </div>
+                            ) : null}
                           </div>
                         </div>
-
-                        {review.comment ? (
-                          <div
-                            className="mt-3 text-sm leading-relaxed"
-                            style={{ color: "var(--color-muted)" }}
-                          >
-                            {review.comment}
-                          </div>
-                        ) : null}
-
-                        {formattedDate ? (
-                          <div
-                            className={`${review.comment ? "mt-2" : "mt-3"} text-xs text-right`}
-                            style={{ color: "var(--color-muted)" }}
-                          >
-                            {formattedDate}
-                          </div>
-                        ) : null}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+                      </button>
+                    );
+                  });
+              })()}
             </div>
           </div>
 
-          <Interests reviews={previewReviews} allMovies={allMovies} />
+          <Interests reviews={userReviews} allMovies={allMovies} />
           <Watchlist allMovies={allMovies} />
         </div>
       </div>
