@@ -101,6 +101,8 @@ function EmojiGrid({ yValues = [0, 0, 0, 0] }) {
             {col.blocks.map((block) => (
               <motion.button
                 key={block.mood}
+                type="button"
+                aria-label={`Select mood ${moodLabels[block.mood] || block.mood}`}
                 layoutId={`emoji-block-${block.mood}`}
                 onClick={(e) => handleClick(e, block)}
                 style={{ backgroundColor: block.color, borderRadius: '1.5rem' }}

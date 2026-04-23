@@ -105,7 +105,7 @@ useEffect(() => {
             Movie Reviews
           </h1>
           <p style={{ color: "var(--color-muted)" }} className="text-lg">
-            See what other users think about movies
+            See other users' reviews and ratings for your favorite movies, or find new ones to watch based on their feedback!
           </p>
         </div>
 

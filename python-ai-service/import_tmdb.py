@@ -60,6 +60,9 @@ def fetch_movies(page=1):
 
 def insert_movie(movie):
     genres = movie.get("genre_ids", [])
+    # Skip adult-tagged movies to keep the dataset family-friendly
+    if movie.get("adult"):
+        return
 
     cur.execute("""
         INSERT INTO movies (

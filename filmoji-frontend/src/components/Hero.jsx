@@ -166,6 +166,8 @@ function Hero({ movies }) {
             {col.blocks.map((block) => (
               <motion.button
                 key={block.mood}
+                type="button"
+                aria-label={`Select mood ${moodLabels[block.mood] || block.mood}`}
                 layoutId={`emoji-block-${block.mood}`}
                 onClick={(e) => handleClick(e, block)}
                 // Reuse this radius as main theme

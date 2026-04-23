@@ -114,33 +114,51 @@ function Register() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            <label htmlFor="register-name" className="sr-only">Name</label>
             <input
+              id="register-name"
+              name="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Name"
+              aria-required="true"
               className="input-field"
             />
+
+            <label htmlFor="register-email" className="sr-only">Email</label>
             <input
+              id="register-email"
+              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
+              aria-required="true"
               className="input-field"
             />
+
             <div className="flex flex-col sm:flex-row gap-3">
+              <label htmlFor="register-password" className="sr-only">Password</label>
               <input
+                id="register-password"
+                name="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
+                aria-required="true"
                 className="input-field flex-1"
               />
+              <label htmlFor="register-confirm" className="sr-only">Repeat Password</label>
               <input
+                id="register-confirm"
+                name="confirm"
                 type="password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder="Repeat Password"
+                aria-required="true"
                 className="input-field flex-1"
               />
             </div>
