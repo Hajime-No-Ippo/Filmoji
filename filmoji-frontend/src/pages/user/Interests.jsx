@@ -1,14 +1,24 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const ALLOWED_CATEGORIES = [
-  "Drama",
-  "Comedy",
-  "Romance",
   "Action",
   "Adventure",
-  "Thriller",
+  "Animation",
+  "Comedy",
+  "Crime",
+  "Documentary",
+  "Drama",
+  "Family",
+  "Fantasy",
+  "History",
   "Horror",
+  "Music",
+  "Mystery",
+  "Romance",
   "Sci-Fi",
+  "Thriller",
+  "War",
+  "Western",
 ];
 
 function normalizeGenre(raw) {
@@ -33,7 +43,17 @@ function parseMovieGenres(movie) {
   const raw = movie?.genres;
 
   if (Array.isArray(raw)) {
-    return raw.map(normalizeGenre).filter(Boolean);
+    // Handle object array format [{id, name}, ...] or string array
+    return raw
+      .map((item) => {
+        // If item is an object with 'name' property, extract the name
+        if (typeof item === "object" && item !== null && "name" in item) {
+          return normalizeGenre(item.name);
+        }
+        // Otherwise treat as string
+        return normalizeGenre(item);
+      })
+      .filter(Boolean);
   }
 
   if (typeof raw === "string") {
@@ -52,12 +72,26 @@ function formatAverage(avg) {
 }
 
 function buildCategoryStats({ reviews, allMovies }) {
+  console.log("🔍 buildCategoryStats Full Debug:", {
+    allMoviesType: typeof allMovies,
+    isArray: Array.isArray(allMovies),
+    allMoviesLength: allMovies?.length,
+    allMoviesFullArray: allMovies,
+    firstElement: allMovies?.[0],
+    firstElementType: typeof allMovies?.[0],
+    reviewsLength: reviews?.length,
+    firstReview: reviews?.[0],
+  });
+
   const movieById = new Map((allMovies || []).map((m) => [m.id, m]));
 
   const stats = new Map();
   for (const category of ALLOWED_CATEGORIES) {
     stats.set(category, { count: 0, sum: 0 });
   }
+
+  let matchedCount = 0;
+  let unmatchedGenres = new Set();
 
   for (const review of reviews || []) {
     const movie = movieById.get(review.movieId);
@@ -67,9 +101,21 @@ function buildCategoryStats({ reviews, allMovies }) {
     if (!Number.isFinite(rating)) continue;
 
     const genres = parseMovieGenres(movie);
+    console.log(`📽️ Movie: ${movie.title}`, {
+      rawGenres: movie.genres,
+      parsedGenres: genres,
+      matchedGenres: genres.filter((g) => ALLOWED_CATEGORIES.includes(g)),
+    });
+
     const categories = new Set(
       genres.filter((g) => ALLOWED_CATEGORIES.includes(g)),
     );
+
+    if (categories.size > 0) {
+      matchedCount++;
+    } else {
+      genres.forEach((g) => unmatchedGenres.add(g));
+    }
 
     for (const category of categories) {
       const current = stats.get(category);
@@ -78,6 +124,11 @@ function buildCategoryStats({ reviews, allMovies }) {
       current.sum += rating;
     }
   }
+
+  console.log("📊 Stats Summary:", {
+    matchedMovies: matchedCount,
+    unmatchedGenres: Array.from(unmatchedGenres),
+  });
 
   const rows = Array.from(stats.entries())
     .map(([category, { count, sum }]) => ({
@@ -95,10 +146,22 @@ function buildCategoryStats({ reviews, allMovies }) {
 }
 
 export default function Interests({ reviews, allMovies }) {
+  const [showAll, setShowAll] = useState(false);
+
   const { rows, maxAvg } = useMemo(
     () => buildCategoryStats({ reviews, allMovies }),
     [reviews, allMovies],
   );
+
+  // Detailed debugging log
+  console.log("🎬 Interests Component Debug:", {
+    reviews: reviews ? `${reviews.length} reviews` : "No reviews",
+    allMovies: allMovies ? `${allMovies.length} movies` : "No movies",
+    rows: rows ? `${rows.length} categories` : "No rows",
+    firstReview: reviews?.[0],
+    firstMovie: allMovies?.[0],
+    maxAvg,
+  });
 
   return (
     <div
@@ -130,10 +193,17 @@ export default function Interests({ reviews, allMovies }) {
           </div>
         ) : (
           <div className="mt-6 space-y-4">
-            {rows.slice(0, 8).map((row) => {
+            {rows.slice(0, showAll ? rows.length : 5).map((row) => {
               const widthPct = maxAvg
                 ? Math.max(18, Math.round((row.avg / maxAvg) * 100))
                 : 0;
+
+              console.log("📊 Row Debug:", {
+                category: row.category,
+                avg: row.avg,
+                maxAvg,
+                widthPct,
+              });
 
               return (
                 <div
@@ -142,11 +212,11 @@ export default function Interests({ reviews, allMovies }) {
                   style={{ backgroundColor: "var(--color-card)" }}
                 >
                   <div
-                    className="absolute inset-y-0 left-0"
+                    className="absolute inset-y-0 left-0 transition-all"
                     style={{
                       width: `${widthPct}%`,
                       backgroundColor: "var(--color-mood-blue)",
-                      opacity: 0.12,
+                      opacity: 0.2,
                     }}
                   />
 
@@ -187,6 +257,18 @@ export default function Interests({ reviews, allMovies }) {
                 </div>
               );
             })}
+
+            {rows.length > 5 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setShowAll(!showAll)}
+                  className="text-sm font-semibold transition-colors hover:opacity-80"
+                  style={{ color: "var(--color-mood-blue)" }}
+                >
+                  {showAll ? "Show less" : "See more"}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
