@@ -320,7 +320,7 @@ useEffect(() => {
                   </div>
                   <p
                     style={{ color: "var(--color-ink)" }}
-                    className="leading-relaxed pl-13"
+                    className="leading-relaxed pl-13 whitespace-pre-wrap"
                   >
                     {review.comment}
                   </p>

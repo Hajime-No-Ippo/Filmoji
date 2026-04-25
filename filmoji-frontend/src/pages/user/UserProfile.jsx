@@ -494,7 +494,7 @@ function UserProfile() {
 
                             {review.comment ? (
                               <div
-                                className="mt-3 text-sm leading-relaxed"
+                                className="mt-3 text-sm leading-relaxed whitespace-pre-wrap"
                                 style={{ color: "var(--color-muted)" }}
                               >
                                 {review.comment}

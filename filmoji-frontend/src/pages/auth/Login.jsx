@@ -20,7 +20,7 @@ function Login() {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const token = await credential.user.getIdToken();
       await fetch('/api/users/me', { headers: { Authorization: `Bearer ${token}` } });
-      navigate('/dashboard')
+      navigate('/')
     } catch (error) {
       alert(error.message);
     }

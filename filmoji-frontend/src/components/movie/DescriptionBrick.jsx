@@ -1,7 +1,7 @@
 import CardSwap, { Card } from '../effects/CardSwap/CardSwap'
 import Particles from '../effects/Particles/Particles'
 
-function DescriptionBrick() {
+function DescriptionBrick({ movies }) {
   return (
     <div className="relative gap-3 p-3 pt-30">
       <div
@@ -27,20 +27,34 @@ function DescriptionBrick() {
           <p className="section-subtitle">Try the latest recommendation function!</p>
         </div>
 
-        {/* Right: CardSwap */}
-        <div style={{ flex: 1, height: '600px', position: 'relative', zIndex: 1 }}>
-          <CardSwap cardDistance={60} verticalDistance={70} delay={5000} pauseOnHover={false}>
-            <Card>
-              {/* This is how we change thing in cards */}
-              {/* <p>Test</p> */}
-              <img src="https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"/>
-            </Card>
-            <Card />
-            <Card />
-            <Card />
-            <Card />
-            <Card />
-          </CardSwap>
+       {/* Right Section: CardSwap effect */}
+        <div style={{ flex: 1, height: '600px', position: 'relative' }}>
+          {movies.length > 0 && (
+            <CardSwap
+              cardDistance={60}
+              verticalDistance={70}
+              delay={5000}
+              pauseOnHover={false}
+              >
+              {/** Place Holder
+               * Could be place any content in the cards for effects
+               */}
+                {/* Render up to 6 poster cards using the passed `movies` prop */}
+                {movies.slice(0, 6).map((m, idx) => (
+                  <Card key={m.id} className="overflow-hidden rounded-2xl bg-card flex items-center justify-center">
+                    {m.poster ? (
+                      <img
+                      src={m.poster || m.posterUrl}
+                      alt={m.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
+                    ) : (
+                      <div className="text-muted text-sm">No poster</div>
+                    )}
+                  </Card>
+                ))}
+            </CardSwap>
+          )}
         </div>
       </div>
     </div>
