@@ -51,13 +51,22 @@ function LoginGate() {
 }
 
 function Step3() {
-  const [selected, setSelected] = useState('')
-  const [movies, setMovies]     = useState([])
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState(null)
+  const [selected, setSelected]     = useState([])
+  const [submitted, setSubmitted]   = useState('')
+  const [movies, setMovies]         = useState([])
+  const [loading, setLoading]       = useState(false)
+  const [error, setError]           = useState(null)
 
-  const pick = (emoji) => {
-    setSelected(emoji)
+  const toggle = (emoji) => {
+    setSelected((prev) =>
+      prev.includes(emoji) ? prev.filter((e) => e !== emoji) : [...prev, emoji]
+    )
+  }
+
+  const submit = () => {
+    if (selected.length === 0) return
+    const combo = selected.join('')
+    setSubmitted(combo)
     setMovies([])
     setError(null)
     setLoading(true)
@@ -65,7 +74,7 @@ function Step3() {
     authFetch('/api/recommendations', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ emojis: emoji }),
+      body:    JSON.stringify({ emojis: combo }),
     })
       .then((res) => {
         if (!res.ok) throw new Error(`Server returned ${res.status}`)
@@ -80,14 +89,14 @@ function Step3() {
     <div>
       <section className="mb-10">
         <h1 className="text-3xl font-bold text-ink mb-1">How are you feeling?</h1>
-        <p className="section-subtitle mb-6">Pick your current mood to get recommendations</p>
+        <p className="section-subtitle mb-6">Pick one or more moods, then get recommendations</p>
         <div className="flex flex-wrap gap-2">
           {EMOJIS.map(({ emoji, label }) => (
             <button
               key={emoji}
-              onClick={() => pick(emoji)}
+              onClick={() => toggle(emoji)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all cursor-pointer
-                ${selected === emoji
+                ${selected.includes(emoji)
                   ? 'border-accent bg-accent text-ink font-semibold scale-105'
                   : 'border-white/10 bg-white/5 text-muted hover:bg-white/10 hover:text-ink'}`}
             >
@@ -96,20 +105,37 @@ function Step3() {
             </button>
           ))}
         </div>
+        <div className="mt-6 flex items-center gap-3">
+          <button
+            onClick={submit}
+            disabled={selected.length === 0 || loading}
+            className="px-6 py-2 rounded-full bg-accent text-ink font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition-all cursor-pointer"
+          >
+            {loading ? 'Finding...' : `Get recommendations${selected.length > 1 ? ` (${selected.length})` : ''}`}
+          </button>
+          {selected.length > 0 && (
+            <button
+              onClick={() => setSelected([])}
+              className="text-xs text-muted hover:text-ink transition-colors cursor-pointer underline"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </section>
 
       <section>
         {loading && <p className="text-muted text-sm">Finding movies for you...</p>}
         {error && <p className="text-red-400 text-sm">Could not load recommendations: {error}</p>}
-        {!loading && !error && selected && movies.length === 0 && (
+        {!loading && !error && submitted && movies.length === 0 && (
           <p className="text-muted text-sm">No movies found.</p>
         )}
-        {!selected && !loading && (
-          <p className="text-muted text-sm">Select a mood above to see recommendations.</p>
+        {!submitted && !loading && (
+          <p className="text-muted text-sm">Select one or more moods above and hit "Get recommendations".</p>
         )}
         {movies.length > 0 && (
           <>
-            <h2 className="text-xl font-semibold text-ink mb-6">Top picks for {selected}</h2>
+            <h2 className="text-xl font-semibold text-ink mb-6">Top picks for {submitted}</h2>
             <div className="grid-movies">
               {movies.map((movie) => (
                 <div key={movie.id}>

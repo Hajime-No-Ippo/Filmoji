@@ -91,8 +91,11 @@ const moodToEmoji = {
   laughing: '😂', thoughtful: '🤔', tense: '😤', overwhelmed: '🫠',
 }
 
+const MAX_PICKS = 3
+
 function Hero({ movies }) {
   const { scrollY } = useScroll()
+  const [picks, setPicks] = useState([])
   const [expanded, setExpanded] = useState(null)
   const [selected, setSelected] = useState(movies[0] || {})
   const [loadingMovie, setLoadingMovie] = useState(false)
@@ -105,16 +108,28 @@ function Hero({ movies }) {
   const y3 = useTransform(scrollY, [400, 1600], [0, -140])
   const yValues = [y0, y1, y2, y3]
 
-  const handleClick = async (e, block) => {
+  const togglePick = async (e, block) => {
+    const alreadyPicked = picks.some((p) => p.mood === block.mood)
+    if (alreadyPicked) {
+      setPicks(picks.filter((p) => p.mood !== block.mood))
+      return
+    }
+    if (picks.length >= MAX_PICKS) return
+
+    const nextPicks = [...picks, block]
+    setPicks(nextPicks)
+    if (nextPicks.length < MAX_PICKS) return
+
+    // Third pick — auto-fire the recommendation
     const rect = e.currentTarget.getBoundingClientRect()
-    setExpanded({ ...block, rect })
+    setExpanded({ ...block, rect, picks: nextPicks })
     setLoadingMovie(true)
     try {
-      const emoji = moodToEmoji[block.mood] || block.emoji
+      const emojis = nextPicks.map((p) => moodToEmoji[p.mood] || p.emoji).join('')
       const res = await authFetch('/api/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emojis: emoji }),
+        body: JSON.stringify({ emojis }),
       })
       if (res.ok) {
         const data = await res.json()
@@ -132,7 +147,10 @@ function Hero({ movies }) {
     setLoadingMovie(false)
   }
 
-  const handleClose = () => setExpanded(null)
+  const handleClose = () => {
+    setExpanded(null)
+    setPicks([])
+  }
 
 // for (let i = 0; i < 10; i++) {
 //   const movie = movies[i];
@@ -156,24 +174,54 @@ function Hero({ movies }) {
 
       {/* ── 2. Emoji blocks screen ── */}
       <div className="relative min-h-screen overflow-hidden flex gap-3 p-3 pt-30">
-        
+
+        {/* Selection counter */}
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-4 py-2 rounded-full bg-ink/80 backdrop-blur-sm text-white text-xs font-[Inter] uppercase tracking-widest shadow-lg">
+          <span>
+            {picks.length === 0
+              ? `Pick ${MAX_PICKS} emojis to find your movie`
+              : `${picks.length} / ${MAX_PICKS} selected`}
+          </span>
+          {picks.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setPicks([])}
+              className="text-white/70 hover:text-white underline cursor-pointer"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
         {columns.map((col, colIdx) => (
           <motion.div
             key={colIdx}
             style={{ y: yValues[colIdx], translateY: col.initialY }}
             className="flex flex-col gap-3 flex-1"
           >
-            {col.blocks.map((block) => (
+            {col.blocks.map((block) => {
+              const pickIndex = picks.findIndex((p) => p.mood === block.mood)
+              const isPicked  = pickIndex >= 0
+              return (
               <motion.button
                 key={block.mood}
                 type="button"
                 aria-label={`Select mood ${moodLabels[block.mood] || block.mood}`}
+                aria-pressed={isPicked}
                 layoutId={`emoji-block-${block.mood}`}
-                onClick={(e) => handleClick(e, block)}
+                onClick={(e) => togglePick(e, block)}
                 // Reuse this radius as main theme
                 style={{ backgroundColor: block.color, borderRadius: '1.5rem' }}
-                className="flex items-center justify-center h-52 w-full cursor-pointer border-none shrink-0 hover:brightness-110 hover:scale-[1.03] transition-all duration-200 group"
+                className={`relative flex items-center justify-center h-52 w-full cursor-pointer border-none shrink-0 transition-all duration-200 group
+                  ${isPicked
+                    ? 'ring-4 ring-white scale-[1.04] brightness-110'
+                    : 'hover:brightness-110 hover:scale-[1.03]'}`}
               >
+                {isPicked && (
+                  <span className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white text-ink text-sm font-bold flex items-center justify-center shadow-md">
+                    {pickIndex + 1}
+                  </span>
+                )}
                 <motion.span
                   layoutId={`emoji-${block.mood}`}
                   className="text-7xl group-hover:scale-110 transition-transform duration-200 leading-none select-none"
@@ -181,7 +229,8 @@ function Hero({ movies }) {
                   {block.emoji}
                 </motion.span>
               </motion.button>
-            ))}
+              )
+            })}
           </motion.div>
         ))}
       </div>
@@ -228,13 +277,32 @@ function Hero({ movies }) {
 
               {/* ── Left panel: emoji + mood identity ── */}
               <div className="flex flex-col items-center justify-center w-[42%] px-12 gap-5">
-                <motion.span
-                  layoutId={`emoji-${expanded.mood}`}
-                  className="leading-none select-none"
-                  style={{ fontSize: 'clamp(6rem, 14vw, 13rem)' }}
-                >
-                  {expanded.emoji}
-                </motion.span>
+                <div className="flex items-center justify-center gap-4">
+                  {(expanded.picks || [expanded]).map((p, i) => (
+                    p.mood === expanded.mood ? (
+                      <motion.span
+                        key={p.mood}
+                        layoutId={`emoji-${p.mood}`}
+                        className="leading-none select-none"
+                        style={{ fontSize: 'clamp(4rem, 9vw, 8rem)' }}
+                      >
+                        {p.emoji}
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key={p.mood}
+                        initial={{ opacity: 0, scale: 0.6, y: 16 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ delay: 0.12 + i * 0.06 }}
+                        className="leading-none select-none"
+                        style={{ fontSize: 'clamp(4rem, 9vw, 8rem)' }}
+                      >
+                        {p.emoji}
+                      </motion.span>
+                    )
+                  ))}
+                </div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
@@ -247,9 +315,11 @@ function Hero({ movies }) {
                     You're feeling
                   </p>
                   <h2 className="text-white font-bold tracking-tight leading-none"
-                    style={{ fontSize: 'clamp(2rem, 4.5vw, 4rem)' }}
+                    style={{ fontSize: 'clamp(1.5rem, 3.2vw, 2.75rem)' }}
                   >
-                    {moodLabels[expanded.mood]}
+                    {(expanded.picks || [expanded])
+                      .map((p) => (moodLabels[p.mood] || p.mood).split(' ').slice(1).join(' '))
+                      .join(' + ')}
                   </h2>
                 </motion.div>
               </div>
@@ -289,8 +359,12 @@ function Hero({ movies }) {
                 </h3>
                 <p className="text-white/60 text-sm leading-relaxed mb-8">
                   Based on your{' '}
-                  <span className="font-semibold text-white/80">{expanded.mood}</span> mood, this film's
-                  tone, pacing, and emotional arc are a natural match for how you're feeling.
+                  <span className="font-semibold text-white/80">
+                    {(expanded.picks || [expanded])
+                      .map((p) => (moodLabels[p.mood] || p.mood).split(' ').slice(1).join(' ').toLowerCase())
+                      .join(' + ')}
+                  </span>{' '}
+                  blend, this film's tone, pacing, and emotional arc are a natural match for how you're feeling.
                 </p>
 
                 {/* Trailer placeholder */}
@@ -323,7 +397,7 @@ function Hero({ movies }) {
                 </div>
 
                 <Link
-                  to={`/recommendations?mood=${expanded.mood}`}
+                  to={`/recommendations?moods=${(expanded.picks || [expanded]).map((p) => p.mood).join(',')}`}
                   onClick={handleClose}
                   className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-sm font-bold uppercase tracking-widest rounded-full no-underline transition-all hover:bg-white/90 hover:gap-3 self-start"
                   style={{ color: expanded.color }}
