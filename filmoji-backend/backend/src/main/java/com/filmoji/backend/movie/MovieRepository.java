@@ -42,11 +42,13 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     @Query(value = """
             SELECT m.* FROM movies m
-            JOIN movie_genres mg ON mg.movie_id = m.id
-            JOIN genres g ON g.id = mg.genre_id
-            WHERE m.movie_vector IS NOT NULL
+            WHERE m.id IN (
+                SELECT mg.movie_id FROM movie_genres mg
+                JOIN genres g ON g.id = mg.genre_id
+                WHERE g.name IN (:genres)
+            )
+            AND m.movie_vector IS NOT NULL
             AND m.rating >= 5.0
-            AND g.name IN (:genres)
             ORDER BY m.movie_vector <=> CAST(:queryVector AS vector)
             LIMIT :limit
             """, nativeQuery = true)
