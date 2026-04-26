@@ -21,7 +21,7 @@ function ReviewSnippetCard({ review, movieId }) {
           <p className="text-sm font-semibold text-ink truncate">{review.userEmail}</p>
           <span className="text-xs font-bold text-accent flex-shrink-0">{review.rating}/10</span>
         </div>
-        <p className="text-sm text-muted line-clamp-2 leading-relaxed" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 400 }}>
+        <p className="text-sm text-muted line-clamp-2 leading-relaxed whitespace-pre-wrap" style={{ fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 400 }}>
           {review.comment}
         </p>
       </div>

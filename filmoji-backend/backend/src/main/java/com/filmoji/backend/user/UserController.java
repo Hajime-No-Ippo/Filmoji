@@ -2,6 +2,7 @@ package com.filmoji.backend.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.filmoji.backend.movie.Genre;
+import com.filmoji.backend.movie.Genre;
 import com.filmoji.backend.movie.Movie;
 import com.filmoji.backend.movie.MovieRepository;
 import com.filmoji.backend.security.FilmojiUserPrincipal;
@@ -29,15 +30,18 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final UserProfileService userProfileService;
+    private final UserProfileRepository userProfileRepository;
     private final MovieRepository movieRepository;
     private final UserInteractionRepository interactionRepository;
 
     public UserController(UserRepository userRepository,
                           UserProfileService userProfileService,
+                          UserProfileRepository userProfileRepository,
                           MovieRepository movieRepository,
                           UserInteractionRepository interactionRepository) {
         this.userRepository        = userRepository;
         this.userProfileService    = userProfileService;
+        this.userProfileRepository = userProfileRepository;
         this.movieRepository       = movieRepository;
         this.interactionRepository = interactionRepository;
     }
@@ -54,6 +58,27 @@ public class UserController {
         res.put("email",              principal.getEmail());
         res.put("displayName",        principal.getDisplayName());
         return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/me/top-movies")
+    public ResponseEntity<List<Movie>> getTop(
+        @AuthenticationPrincipal FilmojiUserPrincipal principal
+    ) {
+        if(principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        UserProfile profile = userProfileRepository.findByUserId(principal.getUserId()).orElse(null);
+        if(profile == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        if(profile.getProfileVector() == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        String vectorStr = Arrays.toString(profile.getProfileVector()).replace(" ","");
+
+        List<Movie> results = movieRepository.findTopNByVectorSimilarity(vectorStr, 10);
+        List<Integer> ids = results.stream().map(Movie::getId).toList();
+        return ResponseEntity.ok(movieRepository.findByIdsWithGenres(ids));
     }
 
     /**
