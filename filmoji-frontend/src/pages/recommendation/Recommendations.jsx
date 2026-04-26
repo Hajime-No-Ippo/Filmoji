@@ -22,29 +22,36 @@ const moodLabels = {
   overwhelmed: "🫠 Overwhelmed",
 };
 
+const moodToEmoji = {
+  happy: '😊', angry: '😡', cool: '😎', festive: '🥳',
+  sad: '😢', romantic: '😍', excited: '🤩', bored: '🥱',
+  scared: '😱', emotional: '🥺', mindblown: '🤯', peaceful: '😌',
+  laughing: '😂', thoughtful: '🤔', tense: '😤', overwhelmed: '🫠',
+};
+
 function Recommendations() {
   const [searchParams] = useSearchParams();
-  const mood = searchParams.get("mood") || "";
-  const label = moodLabels[mood] || mood;
+  // Accept ?moods=happy,romantic,adventure (preferred) OR legacy ?mood=happy
+  const moodsParam = searchParams.get("moods");
+  const moods = moodsParam
+    ? moodsParam.split(",").map((m) => m.trim()).filter(Boolean)
+    : (searchParams.get("mood") ? [searchParams.get("mood")] : []);
+
+  const labels = moods.map((m) => moodLabels[m] || m);
+  const headingLabel = labels.join(" + ");
+
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const moodToEmoji = {
-    happy: '😊', angry: '😡', cool: '😎', festive: '🥳',
-    sad: '😢', romantic: '😍', excited: '🤩', bored: '🥱',
-    scared: '😱', emotional: '🥺', mindblown: '🤯', peaceful: '😌',
-    laughing: '😂', thoughtful: '🤔', tense: '😤', overwhelmed: '🫠',
-  };
 
   useEffect(() => {
     setLoading(true);
 
-    if (mood) {
-      const emoji = moodToEmoji[mood] || mood;
+    if (moods.length > 0) {
+      const emojiCombo = moods.map((m) => moodToEmoji[m] || m).join("");
       authFetch('/api/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emojis: emoji }),
+        body: JSON.stringify({ emojis: emojiCombo }),
       })
         .then((res) => {
           if (!res.ok) throw new Error('No recommendations');
@@ -85,7 +92,8 @@ function Recommendations() {
       )
       .catch(() => setMovies([]))
       .finally(() => setLoading(false));
-  }, [mood]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moodsParam, searchParams.get("mood")]);
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-6">
@@ -95,10 +103,12 @@ function Recommendations() {
         </Link>
 
         <h1 className="text-3xl font-bold text-ink mb-2">
-          {label ? `Feeling ${label}?` : "Recommendations"}
+          {headingLabel ? `Feeling ${headingLabel}?` : "Recommendations"}
         </h1>
         <p className="section-subtitle mb-10">
-          Movies picked for your current mood
+          {moods.length > 1
+            ? `Movies picked for your blended mood (${moods.length} emojis)`
+            : "Movies picked for your current mood"}
         </p>
 
         {loading ? (

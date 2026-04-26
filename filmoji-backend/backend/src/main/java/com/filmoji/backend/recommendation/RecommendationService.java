@@ -20,7 +20,7 @@ import java.util.*;
  * 1. Map emoji string to emotion text using the EMOJI_EMOTIONS catalog
  * 2. Call HuggingFace API to get 384-dim embedding of the emotion text
  * 3. Get user's profile_vector from DB
- * 4. Combine: combined = normalize((emoji_vector * 0.6) + (profile_vector * 0.4))
+ * 4. Combine: combined = normalize((emoji_vector * 0.8) + (profile_vector * 0.2))
  * 5. Query pgvector: SELECT * FROM movies ORDER BY movie_vector <=> combined LIMIT 3
  * 6. Enrich with fresh TMDB data
  * 7. Return top 3 with why_recommended explanation
@@ -163,10 +163,9 @@ public class RecommendationService {
                 : EMOJI_GENRES.getOrDefault(primaryEmoji.get(0), List.of());
 
         float[] queryVector;
-        if (profileVector != null && !genreFilter.isEmpty()) {
-            // Genre filter already constrains results — use pure emoji vector for quality
-            queryVector = embeddingService.normalize(emojiVector);
-        } else if (profileVector != null) {
+        if (profileVector != null) {
+            // 80% emoji intent, 20% personal taste profile (from onboarding quiz + swipes,
+            // updated incrementally by every subsequent interaction).
             queryVector = embeddingService.weightedCombine(emojiVector, profileVector, 0.8f, 0.2f);
         } else {
             queryVector = embeddingService.normalize(emojiVector);

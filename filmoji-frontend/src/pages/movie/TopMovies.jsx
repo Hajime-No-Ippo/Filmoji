@@ -12,11 +12,12 @@ function TopMovies({ movies }) {
           Top 10 for you</h2>
         <p className="section-subtitle">Handpicked recommendations just for you</p>
         <div>
-          <div className="overflow-x-auto pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex gap-6 snap-x snap-mandatory px-2">
+          <div className="overflow-x-auto pb-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-6 px-2">
               {movies.map((movie, index) => (
                 // Gradient Overlay 
-                <div key={movie.id} className="relative shrink-0 snap-center w-[250px]">
+                <div key={movie.id} className="relative shrink-0 snap-center"
+                style={{ width: 'clamp(140px, 30vw, 250px)' }}>
                   <MovieCard movie={movie} rank={index + 1}/>
                 </div>
               ))}

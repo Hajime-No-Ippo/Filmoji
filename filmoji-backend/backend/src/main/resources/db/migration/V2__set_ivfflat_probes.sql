@@ -1,0 +1,12 @@
+-- Increase ivfflat.probes from the PostgreSQL default of 1 to 10.
+--
+-- The movies.movie_vector ivfflat index was created with lists=100. With the
+-- default probes=1, ORDER BY ... <=> ... only scans 1 of 100 partitions, which
+-- caused recommendation queries with restrictive filters (e.g., genre IN (...))
+-- to return as few as 1 row instead of the requested LIMIT N. probes=10 scans
+-- 10% of partitions, which is more than enough recall for the current movie
+-- catalog (~3000 rows) while keeping queries fast.
+--
+-- This is a database-level default applied to all new sessions; existing
+-- sessions in the connection pool will not see it until they reconnect.
+ALTER DATABASE filmoji SET ivfflat.probes = 10;

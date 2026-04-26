@@ -22,7 +22,7 @@ function Register() {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      navigate('/emoji-recommendations')
+      navigate('/onboarding')
     } catch (error) {
       alert(error.message);
     }
