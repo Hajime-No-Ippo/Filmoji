@@ -39,6 +39,9 @@ Four services, one `docker-compose.yml`:
                  │ db (pgvector)          │   Postgres + vector, ivfflat recall
                  └────────────────────────┘
 ```
+Dataflow Diagram
+
+<img width="5057" height="6327" alt="diagram (1)" src="https://github.com/user-attachments/assets/132f38cc-15cc-4ca3-8c40-48bc014dfc59" />
 
 ## Tech stack
 
